@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2dd8f2628322fd4d866aab960c8767a, type: 3}
+  m_Name: Ahri_E
+  m_EditorClassIdentifier: 
+  championName: Ahri
+  skillPrefab: {fileID: 2347505329783279336, guid: 04070b88a516b774f92118f620245116, type: 3}
+  damage: 0
