@@ -180,6 +180,7 @@ public class Player : MonoBehaviour
         enemy = null;
         currentTransform.position = Vector3.zero;
 
+        GetComponent<VisualEffect>().SendEvent("Die");
         thisChampion.dead = true;
         Invoke("Spawn", 5f);
     }

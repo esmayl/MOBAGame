@@ -134,7 +134,6 @@ public class Champion : MonoBehaviour
 		{
 			child.gameObject.SetActive(false);
 		}
-		GetComponent<VisualEffect>().SendEvent("Die");
 
 		dead = true;
 		championDeath?.Invoke();

@@ -9,6 +9,7 @@ public class HealthBar : MonoBehaviour
     void Start()
     {
         myId = UIHandler.instance.AddHpBar(transform);
+        Debug.Log(transform.name +" "+transform.position);
     }
 
     // Update is called once per frame

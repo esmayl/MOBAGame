@@ -199,6 +199,7 @@ public class Enemy : MonoBehaviour
 
         targetPosition = Vector3.zero;
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
+        GetComponent<VisualEffect>().SendEvent("Die");
         Invoke("Spawn", 1f);
     }
 

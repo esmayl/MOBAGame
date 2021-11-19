@@ -56,7 +56,7 @@
     <Compile Include="Assets\Scripts\Champions\Skills\AhriQ.cs" />
     <Compile Include="Assets\Scripts\PlayerState.cs" />
     <Compile Include="Assets\Scripts\Champions.cs" />
-    <Compile Include="Assets\PlayerCamera.cs" />
+    <Compile Include="Assets\Scripts\PlayerCamera.cs" />
     <Compile Include="Assets\Scripts\Champions\Skills\AhriE.cs" />
     <Compile Include="Assets\Scripts\Champion.cs" />
     <Compile Include="Assets\Scripts\Projectiles\SkillShotProjectile.cs" />
@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\AttackState.cs" />
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
     <Compile Include="Assets\Scripts\UIHandler.cs" />
+    <Compile Include="Assets\Scripts\Nexus.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
