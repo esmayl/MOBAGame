@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 using UnityEngine.VFX;
 
@@ -15,6 +16,10 @@ public class Player : MonoBehaviour
     Transform enemy;
 
     Champion thisChampion;
+
+    NavMeshAgent agent;
+    NavMeshPath resultPath;
+    int currentPathNode = 0;
 
     AttackState attackState;
     MovementState moveState;
@@ -40,6 +45,9 @@ public class Player : MonoBehaviour
         fakeTransform.name = "Fake pos";
 
         currentTransform = fakeTransform;
+
+        agent = GetComponent<NavMeshAgent>();
+        resultPath = new NavMeshPath();
 
 
         playerParticles = GetComponent<VisualEffect>();
@@ -109,6 +117,12 @@ public class Player : MonoBehaviour
                     currentTransform.position = temp;
                 }
 
+
+                if (agent.CalculatePath(currentTransform.position, resultPath))
+                {
+                    currentPathNode = 0;
+                    targetPosition = resultPath.corners[currentPathNode];
+                }
             }
         }
 

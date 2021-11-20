@@ -7,19 +7,17 @@ using UnityEngine.VFX;
 [RequireComponent(typeof(Champion),typeof(HealthBar))]
 public class Enemy : MonoBehaviour
 {
+    public float attackRange = 2;
     public float detectionRange = 4;
     public Transform endPos;
 
     NavMeshAgent agent;
-    NavMeshPath resultPath;
-    int currentPathNode = 0;
+    NavMeshPath debuggingPath;
 
     VisualEffect enemyParticles;
     Vector3 temporarySpawnSave;
 
     Vector3 targetPosition;
-    Transform currentTransform;
-    Transform fakeTransform;
     Transform enemyTransform;
     Animator anim;
 
@@ -27,7 +25,6 @@ public class Enemy : MonoBehaviour
 
     AttackState attackState;
     MovementState moveState;
-    IdleState idleState;
 
     PlayerState activeState;
 
@@ -35,17 +32,10 @@ public class Enemy : MonoBehaviour
     Collider thisCollider;
     LayerMask layerMask;
 
-    // Start is called before the first frame update
     void Start()
     {
-        fakeTransform = new GameObject().transform;
-        fakeTransform.name = "Fake pos";
-
-        currentTransform = fakeTransform;
-
         temporarySpawnSave = transform.position;
         agent = GetComponent<NavMeshAgent>();
-        resultPath = new NavMeshPath();
         anim = GetComponent<Animator>();
         thisCollider = GetComponent<Collider>();
 
@@ -54,22 +44,39 @@ public class Enemy : MonoBehaviour
         thisChampion = GetComponent<Champion>();
         thisChampion.bi = Champions.main.GetChampion(gameObject.name);
         thisChampion.Init();
+
+        agent.speed = thisChampion.speed * 0.03f;
+
         thisChampion.championDeath += Respawn;
 
         attackState = new AttackState(gameObject, thisChampion, anim);
-        //attackState.beginAttack += CheckIfEnemyAlive;
         attackState.endAttack += PlayAttackParticles;
-        attackState.enemyDead += CheckIfEnemyAlive;
+        attackState.enemyDead += EnemyDied;
 
         moveState = new MovementState(gameObject, thisChampion,anim);
         moveState.beginMove += PlayMovementParticles;
 
-        idleState = new IdleState(gameObject, thisChampion, anim);
-
-        activeState = idleState;
-
         layerMask = 1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Attackable");
 
+        activeState = moveState;
+        agent.stoppingDistance = attackRange;
+        agent.SetDestination(endPos.position);
+
+    }
+
+    void OnDrawGizmos()
+    {
+        if (!agent) { return; }
+        if (agent.hasPath)
+        {
+            debuggingPath = agent.path;
+            Vector3 previous = transform.position;
+            foreach(Vector3 node in debuggingPath.corners)
+            {
+                Gizmos.DrawLine(previous, node);
+                previous = node;
+            }
+        }
     }
 
     void Update()
@@ -80,88 +87,36 @@ public class Enemy : MonoBehaviour
 
         if (!enemyTransform)
         {
-            if (agent.CalculatePath(endPos.position, resultPath))
+            if (agent.destination != endPos.position)
             {
-                currentPathNode = 0;
-                fakeTransform.position = resultPath.corners[currentPathNode];
-                currentTransform = fakeTransform;
-                targetPosition = fakeTransform.position;
+                agent.isStopped = false;
+                agent.SetDestination(endPos.position);
+                targetPosition = endPos.position;
             }
         }
 
         hits = Physics.OverlapSphere(gameObject.transform.position, detectionRange, layerMask);
 
-        if(hits.Length > 0)
+        if(hits.Length > 0 && !enemyTransform)
         {
             enemyTransform = Champion.GetClosestEnemy(transform.position,hits,thisCollider,thisChampion.team);
             if (enemyTransform)
             {
-                if (agent.CalculatePath(enemyTransform.position, resultPath))
+                if (agent.destination != enemyTransform.position)
                 {
-                    if (resultPath.corners.Length > 1)
-                    {
-                        currentPathNode = 0;
-                        fakeTransform.position = resultPath.corners[currentPathNode];
-                        currentTransform = fakeTransform;
-                        targetPosition = fakeTransform.position;
-                    }
-                    else
-                    {
-                        currentPathNode = 0;
-                        currentTransform = enemyTransform;
-                        targetPosition = enemyTransform.position;
-                    }
-
-
+                    targetPosition = enemyTransform.position;
+                    agent.SetDestination(enemyTransform.position);
                 }
             }
         }
 
-        if (Vector3.Distance(transform.position, targetPosition) < 2 && enemyTransform)
+        if (Vector3.Distance(transform.position, targetPosition) < attackRange && enemyTransform)
         {
             activeState = attackState;
-            currentTransform = enemyTransform;
+            agent.velocity = Vector3.zero;
         }
 
-
-        if (targetPosition == Vector3.zero)
-        {
-            return;
-        }
-
-        if (Vector3.Distance(transform.position, targetPosition) < 2 && enemyTransform == null)
-        {
-            if (currentPathNode < resultPath.corners.Length-1)
-            {
-                currentPathNode++;
-                fakeTransform.position = resultPath.corners[currentPathNode];
-                currentTransform = fakeTransform;
-                targetPosition = fakeTransform.position;
-            }
-            //else
-            //{
-            //    if (agent.CalculatePath(endPos.position, resultPath))
-            //    {
-            //        currentPathNode = 1;
-            //        targetPosition = resultPath.corners[currentPathNode];
-            //        fakeTransform.position = targetPosition;
-            //        currentTransform = fakeTransform;
-            //    }
-            //}
-        }
-
-        if (Vector3.Distance(transform.position, targetPosition) > 2)
-        {
-            activeState = moveState;
-        }
-
-        if (Vector3.Distance(transform.position, targetPosition) < 2 && enemyTransform == null)
-        {
-            activeState = idleState;
-        }
-
-
-        activeState.Execute(currentTransform, Time.deltaTime);
+        activeState.Execute(enemyTransform, Time.deltaTime);
 
     }
 
@@ -176,19 +131,20 @@ public class Enemy : MonoBehaviour
         enemyParticles.SendEvent("Play");
     }
 
-    void CheckIfEnemyAlive()
+    void EnemyDied()
     {
-        if(currentTransform.GetComponent<Champion>().dead)
-        {
-            currentTransform = null;
-            targetPosition = Vector3.zero;
-            activeState = idleState;
-        }
+        ResetPathfinding();
+    }
+
+    void ResetPathfinding()
+    {
+        agent.ResetPath();
+
+        enemyTransform = null;
     }
 
     void Respawn()
     {
-        currentTransform = null;
         thisChampion.dead = true;
         GetComponent<Collider>().enabled = false;
 
@@ -197,15 +153,17 @@ public class Enemy : MonoBehaviour
             child.gameObject.SetActive(false);
         }
 
-        targetPosition = Vector3.zero;
+
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
         GetComponent<VisualEffect>().SendEvent("Die");
+
         Invoke("Spawn", 1f);
     }
 
     void Spawn()
     {
-        transform.position = temporarySpawnSave;
+        agent.Warp(temporarySpawnSave);
+        thisChampion.dead = false;
 
         GetComponent<Collider>().enabled = true;
         foreach (Transform child in transform)
@@ -213,8 +171,15 @@ public class Enemy : MonoBehaviour
             child.gameObject.SetActive(true);
         }
 
+        enemyTransform = null;
+        targetPosition = endPos.position;
+
         thisChampion.Init();
+        agent.ResetPath();
+
+        agent.SetDestination(targetPosition);
+        activeState = moveState;
+
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
-        thisChampion.dead = false;
     }
 }

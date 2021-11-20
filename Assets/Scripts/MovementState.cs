@@ -31,11 +31,5 @@ public class MovementState : PlayerState
         {
 			counter += deltaTime;
         }
-
-		Vector3 temp = targetPos.position;
-		temp.y = player.transform.position.y;
-
-		player.transform.LookAt(temp);
-		player.transform.Translate(Vector3.forward * (thisChampion.speed * 0.01f) * deltaTime);
 	}
 }
