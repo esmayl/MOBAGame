@@ -10,6 +10,7 @@ public class BasicInformation
 
 
 	//Base Stats;
+	public int gold;
 	public int expWorth;
 	public float speed;
 	public float armor;

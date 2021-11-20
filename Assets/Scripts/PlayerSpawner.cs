@@ -17,7 +17,8 @@ public class PlayerSpawner : MonoBehaviour
     {
         Instantiate(championsObj);
 
-        names = new string[]{ "Ahri","Akali","Alistar","Anivia" };
+        names = new string[]{ "Ahri" };
+        //,"Akali","Alistar","Anivia"
         Vector3 spawnBase = transform.position;
 
         cameraInstance = Instantiate(cameraPrefab, transform.position, Quaternion.identity);

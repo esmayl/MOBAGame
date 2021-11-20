@@ -6,7 +6,7 @@ public class PlayerCamera : MonoBehaviour
 {
     public Transform playerTransform;
     Vector3 distance;
-    float cameraSpeed = 1.2f;
+    float cameraSpeed = 3f;
 
     // Start is called before the first frame update
     void Start()

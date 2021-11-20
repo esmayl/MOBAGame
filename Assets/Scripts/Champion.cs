@@ -49,6 +49,7 @@ public class Champion : MonoBehaviour
 	public float attackSpeed;
 	public int damage;
 	public int speed;
+	public int gold;
 
 	public void Init()
 	{
@@ -95,7 +96,7 @@ public class Champion : MonoBehaviour
 				return true; 
 			}
 
-			owner.GainExp(bi.expWorth); 
+			owner.GainGold(bi.gold); 
 			Die(); 
 			return true; 
 		}
@@ -118,6 +119,11 @@ public class Champion : MonoBehaviour
 		exp += expToGain;
 	}
 
+	public void GainGold(int goldToGain)
+    {
+
+    }
+
 	public void LevelUp()
 	{
 		level++;
@@ -135,7 +141,6 @@ public class Champion : MonoBehaviour
 			child.gameObject.SetActive(false);
 		}
 
-		dead = true;
 		championDeath?.Invoke();
 	}
 

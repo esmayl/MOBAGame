@@ -74,9 +74,9 @@ public class Tower : MonoBehaviour
             else
             {
                 Attack();
+                counter = 0;
             }
 
-            counter = 0;
 
         }
         else
