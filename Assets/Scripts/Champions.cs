@@ -88,7 +88,32 @@ public class Champions : MonoBehaviour
 
 		});
 
-		champions.Add("Melee Minion", new BasicInformation
+		champions.Add("Melee Minion Red", new BasicInformation
+		{
+			//Base Stats;
+			baseDamage = 10,
+			baseHealth = 380,
+			baseMana = 230,
+			speed = 120,
+			baseArmor = 11,
+			baseMagicResist = 30,
+			baseHealthRegen = 5.5f,
+			baseManaRegen = 6.25f,
+			baseAttackSpeed = 4,
+			expWorth = 42,
+
+			//Stats PerLevel;	
+			damagePerLevel = 3,
+			healthPerLevel = 80,
+			manaPerLevel = 50,
+			armorPerLevel = 3.5f,
+			magicResistPerLevel = 0,
+			healthRegenPerLevel = 0.6f,
+			manaRegenPerLevel = 0.6f
+
+		});
+
+		champions.Add("Melee Minion Green", new BasicInformation
 		{
 			//Base Stats;
 			baseDamage = 10,

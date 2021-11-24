@@ -88,15 +88,17 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-        hits = Physics.OverlapSphere(gameObject.transform.position, detectionRange, layerMask);
-
-        if(hits.Length > 0 && !enemyTransform)
+        if(!enemyTransform)
         {
+            hits = Physics.OverlapSphere(gameObject.transform.position, detectionRange, layerMask);
+
             enemyTransform = Champion.GetClosestEnemy(transform.position,hits,thisCollider,thisChampion.team);
-            if (enemyTransform)
+
+            if (agent.destination != endPos.position)
             {
-                targetPosition = enemyTransform.position;
-                agent.SetDestination(enemyTransform.position);
+                agent.isStopped = false;
+                agent.SetDestination(endPos.position);
+                targetPosition = endPos.position;
             }
         }
 
@@ -115,6 +117,8 @@ public class Enemy : MonoBehaviour
                 activeState = moveState;
                 agent.isStopped = false;
 
+                targetPosition = enemyTransform.position;
+
                 agent.SetDestination(enemyTransform.position);
             }
             else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
@@ -127,15 +131,6 @@ public class Enemy : MonoBehaviour
 
                 agent.SetDestination(targetPosition);
             }
-        }
-        else
-        {
-            //if (agent.destination != endPos.position)
-            //{
-            //    agent.isStopped = false;
-            //    agent.SetDestination(endPos.position);
-            //    targetPosition = endPos.position;
-            //}
         }
 
         activeState.Execute(enemyTransform, Time.deltaTime);
