@@ -24,15 +24,12 @@ public class AhriQ : SkillState
 
         anim.SetBool("Moving", false);
 
-        //if (closest.GetComponent<Champion>().dead) { return; }
-
         shot.SetActive(true);
         shot.transform.position = player.transform.position + (Vector3.up*0.5f);
         shot.transform.rotation = player.transform.rotation;
 
         temp.Reset();
         temp.hit = false;
-        temp.targetTransform = targetTransform;
         temp.speed = 500;
         temp.damage = (int)thisChampion.damage;
         temp.team = player.GetComponent<Champion>().team;

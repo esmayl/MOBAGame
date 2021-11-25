@@ -44,11 +44,10 @@ public class Enemy : MonoBehaviour
         enemyParticles = GetComponent<VisualEffect>();
 
         thisChampion = GetComponent<Champion>();
-        thisChampion.bi = Champions.main.GetChampion(gameObject.name);
         thisChampion.Init();
 
         agent.speed = thisChampion.speed * 0.03f;
-        agent.stoppingDistance = attackRange;
+        agent.stoppingDistance = attackRange*0.9f;
         agent.SetDestination(endPos.position);
 
         thisChampion.championDeath += Respawn;
@@ -67,20 +66,6 @@ public class Enemy : MonoBehaviour
 
     }
 
-    void OnDrawGizmos()
-    {
-        if (!agent) { return; }
-        if (agent.hasPath)
-        {
-            debuggingPath = agent.path;
-            Vector3 previous = transform.position;
-            foreach(Vector3 node in debuggingPath.corners)
-            {
-                Gizmos.DrawLine(previous, node);
-                previous = node;
-            }
-        }
-    }
 
     void Update()
     {
@@ -88,25 +73,19 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-        if(!enemyTransform)
-        {
-            hits = Physics.OverlapSphere(gameObject.transform.position, detectionRange, layerMask);
-
-            enemyTransform = Champion.GetClosestEnemy(transform.position,hits,thisCollider,thisChampion.team);
-
-            if (agent.destination != endPos.position)
-            {
-                agent.isStopped = false;
-                agent.SetDestination(endPos.position);
-                targetPosition = endPos.position;
-            }
-        }
-
-
         if (enemyTransform)
         {
+            if (enemyTransform.GetComponent<Champion>().dead)
+            {
+                activeState = moveState;
 
-            if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
+                enemyTransform = null;
+                targetPosition = endPos.position;
+                agent.isStopped = false;
+
+                agent.SetDestination(targetPosition);
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
             {
                 activeState = attackState;
                 agent.velocity = Vector3.zero;
@@ -131,6 +110,25 @@ public class Enemy : MonoBehaviour
 
                 agent.SetDestination(targetPosition);
             }
+        }
+
+        if (!enemyTransform)
+        {
+            activeState = moveState;
+
+            if (agent.isStopped)
+            {
+
+                enemyTransform = null;
+                targetPosition = endPos.position;
+                agent.isStopped = false;
+
+                agent.SetDestination(targetPosition);
+            }
+
+            hits = Physics.OverlapSphere(gameObject.transform.position, detectionRange, layerMask);
+
+            enemyTransform = Champion.GetClosestEnemy(transform.position, hits, thisCollider, thisChampion.team);
         }
 
         activeState.Execute(enemyTransform, Time.deltaTime);

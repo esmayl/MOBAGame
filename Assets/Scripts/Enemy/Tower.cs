@@ -34,7 +34,6 @@ public class Tower : MonoBehaviour
         shotSpawn = transform.Find("ShotSpawn");
 
         thisChampion = GetComponent<Champion>();
-        thisChampion.bi = Champions.main.GetChampion(gameObject.name);
         thisChampion.Init();
         
         counter = thisChampion.attackSpeed;

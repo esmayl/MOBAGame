@@ -53,33 +53,33 @@ public class Champion : MonoBehaviour
 
 	public void Init()
 	{
-		bi = Champions.main.GetChampion(gameObject.name);
+		//bi = Champions.main.GetChampion(gameObject.name);
 		anim = GetComponent<Animator>();
 
 		UpdateStats();
 
 
-		if(skillPrefabs.Length <= 0)
-		{
-			return;
-		}
+		//if(skillPrefabs.Length <= 0)
+		//{
+		//	return;
+		//}
 
-		skills = new SkillState[4];
+		//skills = new SkillState[4];
 
-		//Instantiate all skillPrefabs
-		skillInstances = new GameObject[skillPrefabs.Length];
-		int i = 0;
+		////Instantiate all skillPrefabs
+		//skillInstances = new GameObject[skillPrefabs.Length];
+		//int i = 0;
 
-		foreach (Skill g in skillPrefabs)
-		{
-			skillInstances[i] = Instantiate(g.skillPrefab);
-			i++;
-		}
+		//foreach (Skill g in skillPrefabs)
+		//{
+		//	skillInstances[i] = Instantiate(g.skillPrefab);
+		//	i++;
+		//}
 
-		skills[0] = new AhriQ(gameObject, this, anim, skillInstances[0]);
-		skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
-		skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
-		skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
+		//skills[0] = new AhriQ(gameObject, this, anim, skillInstances[0]);
+		//skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
+		//skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
+		//skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
 	}
 
 	public bool ChangeHp(int dmg,Champion owner)
@@ -150,7 +150,7 @@ public class Champion : MonoBehaviour
 		mp = (int)(bi.baseMana + bi.manaPerLevel * level);
 		damage = (int)(bi.baseDamage + bi.damagePerLevel * level);
 		attackSpeed = bi.baseAttackSpeed / level;
-		speed = (int)bi.speed;
+		speed = (int)bi.baseSpeed * level;
 
 		//stats updaten per level;
 		bi.armor = bi.baseArmor + bi.armorPerLevel * level;

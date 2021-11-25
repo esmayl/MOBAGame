@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d8f79e3e4926e84db526f9632ae4904, type: 3}
+  m_Name: Tower
+  m_EditorClassIdentifier: 
+  gold: 50
+  expWorth: 0
+  speed: 0
+  armor: 11
+  magicResist: 30
+  abilityPower: 0
+  healthRegen: 5.5
+  manaRegen: 6.25
+  attackSpeed: 0
+  effectiveHealthAR: 421.8
+  enemyAD: 0
+  damageReductionAR: 0.9009009
+  realDamageAR: 0.9009009
+  armorPenFlat: 0
+  armorPenPc: 0
+  armorPenPcFactor: 1
+  effectiveHealthMR: 494
+  enemyAPDamage: 0
+  damageReductionMR: 0.7692308
+  realDamageMR: 0.7692308
+  magicPenFlat: 0
+  magicPenPc: 0
+  magicPenPcFactor: 1
+  damagePerLevel: 0
+  healthPerLevel: 0
+  manaPerLevel: 0
+  armorPerLevel: 0
+  magicResistPerLevel: 0
+  healthRegenPerLevel: 0
+  manaRegenPerLevel: 0
+  baseDamage: 50
+  baseSpeed: 120
+  baseHealth: 380
+  baseArmor: 11
+  baseMagicResist: 30
+  baseAbilityPower: 0
+  baseMana: 230
+  baseHealthRegen: 5.5
+  baseManaRegen: 6.25
+  baseAttackSpeed: 2

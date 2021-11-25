@@ -6,7 +6,6 @@ using UnityEngine.VFX;
 public class SkillShotProjectile : MonoBehaviour
 {
     public float lifetime;
-    public Transform targetTransform;
     public float speed = 1;
     public int damage;
     public Team team;
@@ -19,7 +18,6 @@ public class SkillShotProjectile : MonoBehaviour
 
     void Update()
     {
-        if (targetTransform == null) { return; }
         if (counter >= lifetime) { counter = 0; CancelInvoke(); gameObject.SetActive(false); } else { counter += Time.deltaTime; }
 
         transform.Translate(Vector3.forward * (speed * 0.01f) * Time.deltaTime);
@@ -41,14 +39,14 @@ public class SkillShotProjectile : MonoBehaviour
             {
                 if(hits[0].GetComponent<Champion>() && hits[0].GetComponent<Champion>().team != team)
                 {
-                    targetTransform = hits[0].transform;
+                    Transform hitTransform = hits[0].transform;
 
                     if (!hit)
                     {
                         hit = true;
-                        Debug.Log("Shot Hit: " + targetTransform.name);
+                        Debug.Log("Shot Hit: " + hitTransform.name);
 
-                        targetTransform.GetComponent<Champion>().ChangeHp(damage, owner);
+                        hitTransform.GetComponent<Champion>().ChangeHp(damage, owner);
                         transform.position = owner.transform.position;
                         gameObject.SetActive(false);
                     }

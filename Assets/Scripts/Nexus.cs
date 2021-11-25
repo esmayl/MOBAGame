@@ -12,7 +12,6 @@ public class Nexus : MonoBehaviour
     {
         thisChampion = GetComponent<Champion>();
 
-        thisChampion.bi = Champions.main.GetChampion(gameObject.name);
         thisChampion.Init();
         thisChampion.championDeath += Win;
     }
