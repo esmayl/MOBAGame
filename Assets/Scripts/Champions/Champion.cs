@@ -54,7 +54,7 @@ public class Champion : MonoBehaviour
 	public void Init()
 	{
 		//bi = Champions.main.GetChampion(gameObject.name);
-		anim = GetComponent<Animator>();
+		anim = transform.GetChild(0).GetComponent<Animator>();
 
 		UpdateStats();
 
@@ -238,6 +238,21 @@ public class Champion : MonoBehaviour
 		//}
 
 		return bestTarget;
+	}
+
+	public static bool CheckIfEnemy(Transform hit,Team thisTeam)
+	{
+		Champion temp = hit.transform.GetComponent<Champion>();
+
+		if (temp)
+        {
+			if(temp.team != thisTeam)
+            {
+				return true;
+            }
+        }
+
+		return false;
 	}
 }
 

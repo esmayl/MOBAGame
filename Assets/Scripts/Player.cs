@@ -12,8 +12,8 @@ using UnityEngine.InputSystem.Interactions;
 public class Player : MonoBehaviour
 {
 
-    float attackRange = 2;
-    float stopDistance = 1;
+    float attackRange = 3;
+    float stopDistance = 0.5f;
     VisualEffect playerParticles;
     Vector3 temporarySpawnSave;
     Vector3 targetPosition;
@@ -56,6 +56,8 @@ public class Player : MonoBehaviour
         playerParticles = GetComponent<VisualEffect>();
 
         thisChampion = GetComponent<Champion>();
+        thisChampion.Init();
+
         thisChampion.championDeath += Respawn;
         thisChampion.levelUp += PlayLevelUpParticles;
 
@@ -67,7 +69,7 @@ public class Player : MonoBehaviour
         attackState.endAttack += PlayAttackParticles;
 
         moveState = new MovementState(gameObject, thisChampion, thisChampion.anim);
-        moveState.beginMove += PlayMovementParticles;
+        //moveState.beginMove += PlayMovementParticles;
 
         idleState = new IdleState(gameObject, thisChampion, thisChampion.anim);
 
@@ -140,26 +142,26 @@ public class Player : MonoBehaviour
     {
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y,0));
 
-        if (Physics.Raycast(ray, out hit, 100, ~(1 << LayerMask.NameToLayer("Player"))))
+        if (Physics.SphereCast(ray, 0.5f,out hit, 100, ~(1 << LayerMask.NameToLayer("Player"))))
         {
 
-            hits = Physics.OverlapSphere(hit.point, 0.5f, layerMask);
+            agent.isStopped = true;
 
-            if (hits.Length > 0)
+            enemy = hit.transform;
+
+            if (Champion.CheckIfEnemy(enemy,thisChampion.team))
             {
-                agent.isStopped = true;
-
-                enemy = Champion.GetClosestEnemy(transform.position, hits, GetComponent<Collider>(), thisChampion.team);
-                if (enemy)
+                if (Vector3.Distance(transform.position, enemy.position) > attackRange)
                 {
-                    if (Vector3.Distance(transform.position, enemy.position) > attackRange)
-                    {
-                        agent.SetDestination(enemy.position);
-                        agent.isStopped = false;
-                    }
+                    activeState = moveState;
 
-                    targetPosition = enemy.position;
+                    activeState.Execute(enemy, Time.deltaTime);
+
+                    agent.SetDestination(enemy.position);
+                    agent.isStopped = false;
                 }
+
+                targetPosition = enemy.position;
             }
             else
             {
@@ -167,6 +169,17 @@ public class Player : MonoBehaviour
                 temp.y = transform.position.y;
                 targetPosition = temp;
                 enemy = null;
+
+                if (Vector3.Distance(transform.position, targetPosition) < stopDistance)
+                {
+                    activeState = idleState;
+                }
+                else
+                {
+                    activeState = moveState;
+                }
+
+                activeState.Execute(enemy, Time.deltaTime);
 
                 agent.SetDestination(targetPosition);
                 agent.isStopped = false;

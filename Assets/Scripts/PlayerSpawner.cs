@@ -31,7 +31,6 @@ public class PlayerSpawner : MonoBehaviour
             temp.tag = "Enemy";
             temp.layer = LayerMask.NameToLayer("Attackable");
             temp.GetComponent<Champion>().bi = info;
-            temp.GetComponent<Champion>().Init();
             temp.GetComponent<Champion>().team = Team.Green;
 
             if (info.name == "Ahri")
