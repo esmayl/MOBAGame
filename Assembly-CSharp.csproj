@@ -82,7 +82,10 @@
     <Compile Include="Assets\Scripts\Champions\Skills\AhriR.cs" />
     <Compile Include="Assets\Scripts\States\AttackState.cs" />
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
+    <Compile Include="Assets\Scripts\PathfindingHandler.cs" />
     <Compile Include="Assets\Scripts\UIHandler.cs" />
+    <Compile Include="Assets\Scripts\Nodes.cs" />
+    <Compile Include="Assets\Scripts\Node.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

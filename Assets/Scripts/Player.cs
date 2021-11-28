@@ -39,6 +39,10 @@ public class Player : MonoBehaviour
 
     PlayerInput input;
 
+    public Skill[] skillPrefabs;
+    public SkillState[] skills;
+    GameObject[] skillInstances;
+
 
     void Start()
     {
@@ -79,6 +83,30 @@ public class Player : MonoBehaviour
         activeState = idleState;
 
         layerMask = 1 << LayerMask.NameToLayer("Attackable");
+
+
+
+        //if(skillPrefabs.Length <= 0)
+        //{
+        //	return;
+        //}
+
+        //skills = new SkillState[4];
+
+        ////Instantiate all skillPrefabs
+        //skillInstances = new GameObject[skillPrefabs.Length];
+        //int i = 0;
+
+        //foreach (Skill g in skillPrefabs)
+        //{
+        //	skillInstances[i] = Instantiate(g.skillPrefab);
+        //	i++;
+        //}
+
+        //skills[0] = new AhriQ(gameObject, this, anim, skillInstances[0]);
+        //skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
+        //skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
+        //skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
     }
 
     void Update()
@@ -105,7 +133,7 @@ public class Player : MonoBehaviour
 
         if (doingSkill)
         {
-            thisChampion.skills[0].Execute(null, Time.deltaTime);
+            skills[0].Execute(null, Time.deltaTime);
             doingSkill = false;
         }
         else
@@ -124,10 +152,17 @@ public class Player : MonoBehaviour
             activeState = attackState;
             agent.isStopped = true;
         }
-        if (Vector3.Distance(transform.position, targetPosition) > attackRange)
+        if (Vector3.Distance(transform.position, targetPosition) > attackRange && enemy)
         {
             activeState = moveState;
         }
+
+        if(Vector3.Distance(transform.position, targetPosition) > stopDistance && enemy == null)
+        {
+            activeState = moveState;
+            agent.isStopped = false;
+        }
+
         if (Vector3.Distance(transform.position, targetPosition) < stopDistance && enemy == null)
         {
             agent.isStopped = true;
@@ -135,11 +170,17 @@ public class Player : MonoBehaviour
         }
 
 
+        activeState.Execute(enemy, Time.deltaTime);
+
+        agent.SetDestination(targetPosition);
+
     }
 
 
     public void SetMovePos(InputAction.CallbackContext context)
     {
+        if (thisChampion.dead) { return; }
+
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y,0));
 
         if (Physics.SphereCast(ray, 0.5f,out hit, 100, ~(1 << LayerMask.NameToLayer("Player"))))
@@ -155,13 +196,10 @@ public class Player : MonoBehaviour
                 {
                     activeState = moveState;
 
-                    activeState.Execute(enemy, Time.deltaTime);
+                    targetPosition = enemy.position;
 
-                    agent.SetDestination(enemy.position);
                     agent.isStopped = false;
                 }
-
-                targetPosition = enemy.position;
             }
             else
             {
@@ -170,18 +208,6 @@ public class Player : MonoBehaviour
                 targetPosition = temp;
                 enemy = null;
 
-                if (Vector3.Distance(transform.position, targetPosition) < stopDistance)
-                {
-                    activeState = idleState;
-                }
-                else
-                {
-                    activeState = moveState;
-                }
-
-                activeState.Execute(enemy, Time.deltaTime);
-
-                agent.SetDestination(targetPosition);
                 agent.isStopped = false;
             }
         }
@@ -190,6 +216,8 @@ public class Player : MonoBehaviour
 
     public void DoQ(InputAction.CallbackContext context)
     {
+        if (thisChampion.dead) { return; }
+
         Debug.Log("Doing Q");
 
         doingSkill = true;
@@ -219,6 +247,8 @@ public class Player : MonoBehaviour
 
     void Respawn()
     {
+        if (thisChampion.dead) { return; }
+
         transform.position = temporarySpawnSave;
         enemy = null;
 
@@ -231,7 +261,6 @@ public class Player : MonoBehaviour
 
     void Spawn()
     {
-        transform.position = temporarySpawnSave;
         GetComponent<Collider>().enabled = true;
         foreach (Transform child in transform)
         {

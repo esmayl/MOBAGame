@@ -7,11 +7,11 @@ using UnityEngine.VFX;
 [RequireComponent(typeof(Champion),typeof(HealthBar))]
 public class Enemy : MonoBehaviour
 {
-    public float expRange = 15;
     public Transform endPos;
 
     float attackRange = 3f;
     float detectionRange = 7f;
+    float expRange = 15;
 
     NavMeshAgent agent;
     NavMeshPath debuggingPath;
@@ -34,9 +34,15 @@ public class Enemy : MonoBehaviour
     Collider thisCollider;
     LayerMask layerMask;
 
+    List<Node> path;
+    int currentNode = 0;
+
     void Start()
     {
         temporarySpawnSave = transform.position;
+        targetPosition = endPos.position;
+
+
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
         thisCollider = GetComponent<Collider>();
@@ -46,9 +52,6 @@ public class Enemy : MonoBehaviour
         thisChampion = GetComponent<Champion>();
         thisChampion.Init();
 
-        agent.speed = thisChampion.speed * 0.03f;
-        agent.stoppingDistance = attackRange*0.9f;
-        agent.SetDestination(endPos.position);
 
         thisChampion.championDeath += Respawn;
 
@@ -63,7 +66,12 @@ public class Enemy : MonoBehaviour
 
         activeState = moveState;
 
+        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position);
 
+        foreach (Node n in path)
+        {
+            n.walkable = false;
+        }
     }
 
 
@@ -73,66 +81,67 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-        if (enemyTransform)
+        if(Vector3.Distance(transform.position,path[currentNode].location) < attackRange)
         {
-            if (enemyTransform.GetComponent<Champion>().dead)
+            if (currentNode < path.Count-1)
             {
-                activeState = moveState;
-
-                enemyTransform = null;
-                targetPosition = endPos.position;
-                agent.isStopped = false;
-
-                agent.SetDestination(targetPosition);
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
-            {
-                activeState = attackState;
-                agent.velocity = Vector3.zero;
-                agent.isStopped = true;
-            }
-            else if(Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
-            {
-                activeState = moveState;
-                agent.isStopped = false;
-
-                targetPosition = enemyTransform.position;
-
-                agent.SetDestination(enemyTransform.position);
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
-            {
-                activeState = moveState;
-
-                enemyTransform = null;
-                targetPosition = endPos.position;
-                agent.isStopped = false;
-
-                agent.SetDestination(targetPosition);
+                currentNode++;
             }
         }
+
+        //if (enemyTransform)
+        //{
+        //    if (enemyTransform.GetComponent<Champion>().dead)
+        //    {
+        //        activeState = moveState;
+
+        //        enemyTransform = null;
+        //        targetPosition = endPos.position;
+        //    }
+        //    else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
+        //    {
+        //        activeState = attackState;
+        //        agent.velocity = Vector3.zero;
+        //    }
+        //    else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
+        //    {
+        //        activeState = moveState;
+
+        //        targetPosition = enemyTransform.position;
+        //    }
+        //    else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
+        //    {
+        //        activeState = moveState;
+
+        //        enemyTransform = null;
+        //        targetPosition = endPos.position;
+        //    }
+        //}
 
         if (!enemyTransform)
         {
             activeState = moveState;
 
-            if (agent.isStopped)
+            targetPosition = path[currentNode].location;
+
+            hits = Physics.OverlapSphere(transform.position, detectionRange, layerMask);
+
+            if (hits.Length > 0)
             {
 
-                enemyTransform = null;
-                targetPosition = endPos.position;
-                agent.isStopped = false;
-
-                agent.SetDestination(targetPosition);
+                enemyTransform = Champion.GetClosestEnemy(transform.position, hits, thisCollider, thisChampion.team);
+                if (enemyTransform)
+                {
+                    targetPosition = enemyTransform.position;
+                }
             }
-
-            hits = Physics.OverlapSphere(gameObject.transform.position, detectionRange, layerMask);
-
-            enemyTransform = Champion.GetClosestEnemy(transform.position, hits, thisCollider, thisChampion.team);
         }
+
+
 
         activeState.Execute(enemyTransform, Time.deltaTime);
 
+        transform.Translate((targetPosition - transform.position) * Time.deltaTime);
     }
 
     void PlayMovementParticles()
@@ -153,9 +162,8 @@ public class Enemy : MonoBehaviour
 
     void ResetPathfinding()
     {
-        agent.ResetPath();
-
         enemyTransform = null;
+        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position);
     }
 
     void Respawn()
@@ -196,7 +204,7 @@ public class Enemy : MonoBehaviour
 
     void Spawn()
     {
-        agent.Warp(temporarySpawnSave);
+        transform.position = temporarySpawnSave;
         thisChampion.dead = false;
 
         GetComponent<Collider>().enabled = true;
@@ -209,9 +217,6 @@ public class Enemy : MonoBehaviour
         targetPosition = endPos.position;
 
         thisChampion.Init();
-        agent.ResetPath();
-
-        agent.SetDestination(targetPosition);
         activeState = moveState;
 
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));

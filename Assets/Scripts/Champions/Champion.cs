@@ -16,9 +16,7 @@ public class Champion : MonoBehaviour
 
 	public Animator anim;
 
-	public Skill[] skillPrefabs;
-	public SkillState[] skills;
-	GameObject[] skillInstances;
+
 
 	int[] expPerLevel = new int[]
 	{
@@ -57,29 +55,6 @@ public class Champion : MonoBehaviour
 		anim = transform.GetChild(0).GetComponent<Animator>();
 
 		UpdateStats();
-
-
-		//if(skillPrefabs.Length <= 0)
-		//{
-		//	return;
-		//}
-
-		//skills = new SkillState[4];
-
-		////Instantiate all skillPrefabs
-		//skillInstances = new GameObject[skillPrefabs.Length];
-		//int i = 0;
-
-		//foreach (Skill g in skillPrefabs)
-		//{
-		//	skillInstances[i] = Instantiate(g.skillPrefab);
-		//	i++;
-		//}
-
-		//skills[0] = new AhriQ(gameObject, this, anim, skillInstances[0]);
-		//skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
-		//skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
-		//skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
 	}
 
 	public bool ChangeHp(int dmg,Champion owner)
@@ -223,19 +198,16 @@ public class Champion : MonoBehaviour
 			}
 			tempChampion = enemies[i].GetComponent<Champion>();
 
+			if(tempChampion.team == thisTeam) { continue; }
+
 			Vector3 directionToTarget = enemies[i].transform.position - thisPos;
 			float dSqrToTarget = directionToTarget.sqrMagnitude;
-			if (dSqrToTarget < closestDistanceSqr && tempChampion.team != thisTeam)
+			if (dSqrToTarget < closestDistanceSqr)
 			{
 				closestDistanceSqr = dSqrToTarget;
 				bestTarget = enemies[i].transform;
 			}
 		}
-
-		//if (bestTarget)
-		//{
-		//    Debug.Log("Closest: " + bestTarget.name);
-		//}
 
 		return bestTarget;
 	}
