@@ -8,6 +8,8 @@ using UnityEngine.VFX;
 public class Enemy : MonoBehaviour
 {
     public Transform endPos;
+    public int moveStraightCost = 10;
+    public int moveDiagonalCost = 24;
 
     float attackRange = 3f;
     float detectionRange = 7f;
@@ -36,6 +38,7 @@ public class Enemy : MonoBehaviour
 
     List<Node> path;
     int currentNode = 0;
+    Vector3 direction;
 
     void Start()
     {
@@ -66,12 +69,14 @@ public class Enemy : MonoBehaviour
 
         activeState = moveState;
 
-        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position);
+        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position,moveDiagonalCost,moveStraightCost);
 
         foreach (Node n in path)
         {
             n.walkable = false;
         }
+
+        direction = path[currentNode].location - transform.position;
     }
 
 
@@ -86,37 +91,51 @@ public class Enemy : MonoBehaviour
             if (currentNode < path.Count-1)
             {
                 currentNode++;
+                direction = targetPosition - transform.position;
+                float angle = Vector3.Angle(transform.forward, direction);
+
+                Vector3 rotation = new Vector3();
+                rotation.y = angle;
+
+                transform.Rotate(rotation);
             }
         }
 
-        //if (enemyTransform)
-        //{
-        //    if (enemyTransform.GetComponent<Champion>().dead)
-        //    {
-        //        activeState = moveState;
+        if (enemyTransform)
+        {
+            if (enemyTransform.GetComponent<Champion>().dead)
+            {
+                activeState = moveState;
 
-        //        enemyTransform = null;
-        //        targetPosition = endPos.position;
-        //    }
-        //    else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
-        //    {
-        //        activeState = attackState;
-        //        agent.velocity = Vector3.zero;
-        //    }
-        //    else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
-        //    {
-        //        activeState = moveState;
+                enemyTransform = null;
 
-        //        targetPosition = enemyTransform.position;
-        //    }
-        //    else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
-        //    {
-        //        activeState = moveState;
+                path = PathfindingHandler.instance.GetPath(transform.position, targetPosition, moveDiagonalCost, moveStraightCost);
+                currentNode = 1;
+                targetPosition = path[currentNode].location;
 
-        //        enemyTransform = null;
-        //        targetPosition = endPos.position;
-        //    }
-        //}
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
+            {
+                activeState = attackState;
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
+            {
+                activeState = moveState;
+
+                targetPosition = enemyTransform.position;
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
+            {
+                activeState = moveState;
+
+                enemyTransform = null;
+
+                path = PathfindingHandler.instance.GetPath(transform.position, targetPosition, moveDiagonalCost, moveStraightCost);
+                currentNode = 1;
+                targetPosition = path[currentNode].location;
+
+            }
+        }
 
         if (!enemyTransform)
         {
@@ -141,7 +160,11 @@ public class Enemy : MonoBehaviour
 
         activeState.Execute(enemyTransform, Time.deltaTime);
 
-        transform.Translate((targetPosition - transform.position) * Time.deltaTime);
+        if (Vector3.Distance(transform.position, targetPosition) > attackRange)
+        {
+            transform.position += direction * Time.deltaTime;
+        }
+
     }
 
     void PlayMovementParticles()
@@ -164,6 +187,7 @@ public class Enemy : MonoBehaviour
     {
         enemyTransform = null;
         path = PathfindingHandler.instance.GetPath(transform.position, endPos.position);
+        currentNode = 1;
     }
 
     void Respawn()
@@ -205,6 +229,21 @@ public class Enemy : MonoBehaviour
     void Spawn()
     {
         transform.position = temporarySpawnSave;
+
+        foreach (Node n in path)
+        {
+            n.walkable = true;
+        }
+
+        currentNode = 1;
+
+        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position, moveDiagonalCost, moveStraightCost);
+
+        foreach (Node n in path)
+        {
+            n.walkable = false;
+        }
+
         thisChampion.dead = false;
 
         GetComponent<Collider>().enabled = true;

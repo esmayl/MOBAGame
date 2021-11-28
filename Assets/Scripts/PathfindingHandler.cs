@@ -78,10 +78,6 @@ public class PathfindingHandler : MonoBehaviour
     [SerializeField]
     public Nodes nodes;
 
-    int moveStraightCost = 10;
-    int moveDiagonalCost = 24;
-
-
     float height = 0.1f;
     Vector3 nodeVector3;
 
@@ -131,7 +127,7 @@ public class PathfindingHandler : MonoBehaviour
         return nodeIndex;
     }
 
-    public List<Node> GetPath(Vector3 startPoint,Vector3 endPoint)
+    public List<Node> GetPath(Vector3 startPoint,Vector3 endPoint, int moveDiagonalCost = 24, int moveStraightCost = 10)
     {
         Vector2 startNodePos = GetNodePosition(startPoint);
         Vector2 endNodePos = GetNodePosition(endPoint);
@@ -175,7 +171,7 @@ public class PathfindingHandler : MonoBehaviour
             {
                 if (closedList.Contains(neighbourNode)) { continue; }
 
-                tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode);
+                tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode, moveDiagonalCost, moveStraightCost);
 
 
                 if(tentativeGCost < neighbourNode.gCost)
@@ -262,7 +258,7 @@ public class PathfindingHandler : MonoBehaviour
         return path;
     }
 
-    int CalculateDistanceCost(Node nodeA, Node nodeB)
+    int CalculateDistanceCost(Node nodeA, Node nodeB, int moveDiagonalCost = 24,int moveStraightCost = 10)
     {
         int xDistance = (int)Mathf.Abs(nodeA.location.x - nodeB.location.x);
         int zDistance = (int)Mathf.Abs(nodeA.location.z - nodeB.location.z);

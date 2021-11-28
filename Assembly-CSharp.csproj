@@ -53,6 +53,7 @@
     <UnityVersion>2020.2.2f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Samples\Input System\1.0.2\Simple Demo\SimpleController_UsingActions.cs" />
     <Compile Include="Assets\Scripts\Champions\Skills\AhriQ.cs" />
     <Compile Include="Assets\Scripts\States\PlayerState.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="Assets\Scripts\Nexus.cs" />
     <Compile Include="Assets\Scripts\PlayerCamera.cs" />
     <Compile Include="Assets\Scripts\Champions\Skills\AhriE.cs" />
+    <Compile Include="Assets\Scripts\Nodes.cs" />
     <Compile Include="Assets\Free UI build package\Script\Togglescript.cs" />
     <Compile Include="Assets\Scripts\Champions\Champion.cs" />
     <Compile Include="Assets\Scripts\Projectiles\SkillShotProjectile.cs" />
@@ -84,8 +86,6 @@
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
     <Compile Include="Assets\Scripts\PathfindingHandler.cs" />
     <Compile Include="Assets\Scripts\UIHandler.cs" />
-    <Compile Include="Assets\Scripts\Nodes.cs" />
-    <Compile Include="Assets\Scripts\Node.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
