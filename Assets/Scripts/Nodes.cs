@@ -7,7 +7,7 @@ using UnityEngine;
 public class Nodes : ScriptableObject
 {
     public LayerMask blockingMask;
-    [HideInInspector] public float nodeScale = 2;
+    public float nodeScale = 1;
 
     [SerializeField]
     public Node[,] nodes;

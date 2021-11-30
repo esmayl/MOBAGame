@@ -16,6 +16,7 @@ public class Node
     public Node(Vector3 newLocation)
     {
         location = newLocation;
+        walkable = true;
     }
 
     public void CalculateFCost()

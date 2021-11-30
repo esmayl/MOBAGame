@@ -78,6 +78,8 @@ public class PathfindingHandler : MonoBehaviour
     [SerializeField]
     public Nodes nodes;
 
+    public GameObject testPlane;
+
     float height = 0.1f;
     Vector3 nodeVector3;
 
@@ -127,13 +129,33 @@ public class PathfindingHandler : MonoBehaviour
         return nodeIndex;
     }
 
-    public List<Node> GetPath(Vector3 startPoint,Vector3 endPoint, int moveDiagonalCost = 24, int moveStraightCost = 10)
+    public List<Node> GetPath(Vector3 startPoint,Vector3 endPoint, int moveDiagonalCost = 10, int moveStraightCost = 10)
     {
         Vector2 startNodePos = GetNodePosition(startPoint);
         Vector2 endNodePos = GetNodePosition(endPoint);
 
+
         Node startNode = nodes.nodes[(int)startNodePos.x, (int)startNodePos.y];
         Node endNode = nodes.nodes[(int)endNodePos.x, (int)endNodePos.y];
+
+        while (!endNode.walkable)
+        {
+            List<Node> closestToEnd = GetNeighbourNodes(endNode);
+
+            foreach (Node n in closestToEnd)
+            {
+                if (n.walkable)
+                {
+                    endNode = n;
+                    break;
+                }
+                else
+                {
+                    endNode = n;
+                }
+            }
+
+        }
 
         List<Node> openList = new List<Node> { startNode };
         List<Node> closedList = new List<Node>();
@@ -142,7 +164,7 @@ public class PathfindingHandler : MonoBehaviour
         {
             for(int j = 0; j < nodes.amountOfNodes; j++)
             {
-                nodes.nodes[i, j].gCost = int.MaxValue;
+                nodes.nodes[i, j].gCost = 999999;
                 nodes.nodes[i, j].CalculateFCost();
                 nodes.nodes[i, j].previousNode = null;
 
@@ -153,7 +175,7 @@ public class PathfindingHandler : MonoBehaviour
         startNode.hCost = CalculateDistanceCost(startNode, endNode);
         startNode.CalculateFCost();
 
-        while(openList.Count > 0)
+        while(openList.Count > 0 )
         {
             Node currentNode = GetLowestFCostNode(openList);
 
@@ -167,18 +189,33 @@ public class PathfindingHandler : MonoBehaviour
 
             int tentativeGCost = 0;
 
-            foreach (Node neighbourNode in GetNeighbourNodes(currentNode))
+            List<Node> test = GetNeighbourNodes(currentNode);
+
+            foreach (Node neighbourNode in test)
             {
+
                 if (closedList.Contains(neighbourNode)) { continue; }
+
+                if (!neighbourNode.walkable)
+                {
+                    closedList.Add(neighbourNode);
+                    continue;
+                }
+
+
+                //GameObject temp = Instantiate(testPlane);
+
+                //temp.transform.position = new Vector3(neighbourNode.location.x, 0.1f, neighbourNode.location.z);
+
 
                 tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode, moveDiagonalCost, moveStraightCost);
 
 
-                if(tentativeGCost < neighbourNode.gCost)
+                if (tentativeGCost < neighbourNode.gCost)
                 {
                     neighbourNode.previousNode = currentNode;
                     neighbourNode.gCost = tentativeGCost;
-                    neighbourNode.hCost = CalculateDistanceCost(neighbourNode, endNode);
+                    neighbourNode.hCost = CalculateDistanceCost(neighbourNode, endNode, moveDiagonalCost, moveStraightCost);
                     neighbourNode.CalculateFCost();
 
                     if (!openList.Contains(neighbourNode))
@@ -188,6 +225,8 @@ public class PathfindingHandler : MonoBehaviour
                 }
             }
         }
+
+        Debug.Log("No path found to: " + endPoint);
 
         return null;
     }
@@ -258,7 +297,7 @@ public class PathfindingHandler : MonoBehaviour
         return path;
     }
 
-    int CalculateDistanceCost(Node nodeA, Node nodeB, int moveDiagonalCost = 24,int moveStraightCost = 10)
+    int CalculateDistanceCost(Node nodeA, Node nodeB, int moveDiagonalCost = 10,int moveStraightCost = 10)
     {
         int xDistance = (int)Mathf.Abs(nodeA.location.x - nodeB.location.x);
         int zDistance = (int)Mathf.Abs(nodeA.location.z - nodeB.location.z);
@@ -274,6 +313,7 @@ public class PathfindingHandler : MonoBehaviour
 
         for(int i = 1; i < nodeList.Count; i++)
         {
+
             if(nodeList[i].fCost < lowestFCostNode.fCost)
             {
                 lowestFCostNode = nodeList[i];

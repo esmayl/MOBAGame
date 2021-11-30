@@ -9,7 +9,7 @@ public class Enemy : MonoBehaviour
 {
     public Transform endPos;
     public int moveStraightCost = 10;
-    public int moveDiagonalCost = 24;
+    public int moveDiagonalCost = 10;
 
     float attackRange = 3f;
     float detectionRange = 7f;
@@ -36,7 +36,7 @@ public class Enemy : MonoBehaviour
     Collider thisCollider;
     LayerMask layerMask;
 
-    List<Node> path;
+    List<Node> path = new List<Node>();
     int currentNode = 0;
     Vector3 direction;
 
@@ -69,14 +69,12 @@ public class Enemy : MonoBehaviour
 
         activeState = moveState;
 
-        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position,moveDiagonalCost,moveStraightCost);
+        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position, moveDiagonalCost, moveStraightCost);
 
-        foreach (Node n in path)
-        {
-            n.walkable = false;
-        }
+        currentNode = 1;
 
         direction = path[currentNode].location - transform.position;
+
     }
 
 
@@ -86,9 +84,10 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-        if(Vector3.Distance(transform.position,path[currentNode].location) < attackRange)
+
+        if (Vector3.Distance(transform.position, path[currentNode].location) < attackRange)
         {
-            if (currentNode < path.Count-1)
+            if (currentNode < path.Count - 1)
             {
                 currentNode++;
                 direction = targetPosition - transform.position;
@@ -186,8 +185,9 @@ public class Enemy : MonoBehaviour
     void ResetPathfinding()
     {
         enemyTransform = null;
-        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position);
+        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position, moveDiagonalCost, moveStraightCost);
         currentNode = 1;
+        targetPosition = path[currentNode].location;
     }
 
     void Respawn()
@@ -230,20 +230,6 @@ public class Enemy : MonoBehaviour
     {
         transform.position = temporarySpawnSave;
 
-        foreach (Node n in path)
-        {
-            n.walkable = true;
-        }
-
-        currentNode = 1;
-
-        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position, moveDiagonalCost, moveStraightCost);
-
-        foreach (Node n in path)
-        {
-            n.walkable = false;
-        }
-
         thisChampion.dead = false;
 
         GetComponent<Collider>().enabled = true;
@@ -252,8 +238,7 @@ public class Enemy : MonoBehaviour
             child.gameObject.SetActive(true);
         }
 
-        enemyTransform = null;
-        targetPosition = endPos.position;
+        ResetPathfinding();
 
         thisChampion.Init();
         activeState = moveState;

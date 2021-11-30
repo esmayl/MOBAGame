@@ -43,6 +43,8 @@ public class Player : MonoBehaviour
     public SkillState[] skills;
     GameObject[] skillInstances;
 
+    List<Node> path = new List<Node>();
+    int currentNode = 0;
 
     void Start()
     {
@@ -65,9 +67,6 @@ public class Player : MonoBehaviour
         thisChampion.championDeath += Respawn;
         thisChampion.levelUp += PlayLevelUpParticles;
 
-        agent = GetComponent<NavMeshAgent>();
-        agent.speed = thisChampion.speed * 0.01f;
-
         attackState = new AttackState(gameObject, thisChampion, thisChampion.anim);
         attackState.enemyDead += EnemyDied;
         attackState.endAttack += PlayAttackParticles;
@@ -83,8 +82,6 @@ public class Player : MonoBehaviour
         activeState = idleState;
 
         layerMask = 1 << LayerMask.NameToLayer("Attackable");
-
-
 
         //if(skillPrefabs.Length <= 0)
         //{
@@ -150,30 +147,40 @@ public class Player : MonoBehaviour
         if (Vector3.Distance(transform.position, targetPosition) < attackRange && enemy && !doingSkill)
         {
             activeState = attackState;
-            agent.isStopped = true;
         }
         if (Vector3.Distance(transform.position, targetPosition) > attackRange && enemy)
         {
             activeState = moveState;
         }
 
-        if(Vector3.Distance(transform.position, targetPosition) > stopDistance && enemy == null)
+        if (currentNode == path.Count -1 && Vector3.Distance(transform.position, targetPosition) < stopDistance && enemy == null)
         {
-            activeState = moveState;
-            agent.isStopped = false;
-        }
-
-        if (Vector3.Distance(transform.position, targetPosition) < stopDistance && enemy == null)
-        {
-            agent.isStopped = true;
             activeState = idleState;
         }
 
 
         activeState.Execute(enemy, Time.deltaTime);
 
-        agent.SetDestination(targetPosition);
+        if (Vector3.Distance(transform.position, targetPosition) > stopDistance)
+        {
+            transform.position += (targetPosition - transform.position).normalized * Time.deltaTime *thisChampion.speed * 0.01f;
 
+        }
+        else
+        {
+            if(currentNode < path.Count - 1)
+            {
+                float angle = Vector3.Angle(transform.forward, path[currentNode].location - transform.position);
+
+                Vector3 rotation = new Vector3();
+                rotation.y = angle;
+
+                transform.Rotate(rotation);
+
+                currentNode++;
+                targetPosition = path[currentNode].location;
+            }
+        }
     }
 
 
@@ -186,32 +193,56 @@ public class Player : MonoBehaviour
         if (Physics.SphereCast(ray, 0.5f,out hit, 100, ~(1 << LayerMask.NameToLayer("Player"))))
         {
 
-            agent.isStopped = true;
+            if (hit.point.x < 0) { return; }
+            if (hit.point.z < 0) { return; }
 
-            enemy = hit.transform;
 
-            if (Champion.CheckIfEnemy(enemy,thisChampion.team))
+
+            if (Champion.CheckIfEnemy(hit.transform,thisChampion.team))
             {
+                enemy = hit.transform;
+
                 if (Vector3.Distance(transform.position, enemy.position) > attackRange)
                 {
                     activeState = moveState;
+                    path = PathfindingHandler.instance.GetPath(transform.position, enemy.position);
 
-                    targetPosition = enemy.position;
+                    if (path.Count > 0)
+                    {
+                        Vector3 temp = hit.point;
+                        temp.y = transform.position.y;
 
-                    agent.isStopped = false;
+                        currentNode = 1;
+
+                        targetPosition = path[currentNode].location;
+                        enemy = null;
+                    }
+
                 }
             }
             else
             {
-                Vector3 temp = hit.point;
-                temp.y = transform.position.y;
-                targetPosition = temp;
-                enemy = null;
+                path = PathfindingHandler.instance.GetPath(transform.position, hit.point);
 
-                agent.isStopped = false;
+                if (path.Count > 0)
+                {
+                    currentNode = 1;
+
+                    targetPosition = path[currentNode].location;
+                    enemy = null;
+                }
+
             }
         }
 
+        float angle = Vector3.Angle(transform.forward, targetPosition - transform.position);
+
+        Vector3 rotation = new Vector3();
+        rotation.y = angle;
+
+        transform.Rotate(rotation);
+
+        activeState = moveState;
     }
 
     public void DoQ(InputAction.CallbackContext context)
