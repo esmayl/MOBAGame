@@ -16,15 +16,11 @@ public class Nexus : MonoBehaviour
         thisChampion.championDeath += Win;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     void Win()
     {
 		GetComponent<VisualEffect>().SendEvent("Win");
         GetComponent<MeshRenderer>().enabled = false;
+
+        GameHandler.instance.SetWonTeam(thisChampion.team);
     }
 }

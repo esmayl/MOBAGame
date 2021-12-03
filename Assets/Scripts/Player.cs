@@ -13,13 +13,11 @@ public class Player : MonoBehaviour
 {
 
     float attackRange = 3;
-    float stopDistance = 0.5f;
     VisualEffect playerParticles;
     Vector3 temporarySpawnSave;
-    Vector3 targetPosition;
     Transform enemy;
 
-    Champion thisChampion;
+    public Champion thisChampion;
 
     NavMeshAgent agent;
 
@@ -43,8 +41,8 @@ public class Player : MonoBehaviour
     public SkillState[] skills;
     GameObject[] skillInstances;
 
-    List<Node> path = new List<Node>();
-    int currentNode = 0;
+
+    bool attacking = false;
 
     void Start()
     {
@@ -81,7 +79,8 @@ public class Player : MonoBehaviour
 
         activeState = idleState;
 
-        layerMask = 1 << LayerMask.NameToLayer("Attackable");
+        layerMask = 1 << LayerMask.NameToLayer("Ground");
+        layerMask |= 1 << LayerMask.NameToLayer("Attackable");
 
         //if(skillPrefabs.Length <= 0)
         //{
@@ -112,9 +111,13 @@ public class Player : MonoBehaviour
 
         if (enemy)
         {
-            if (enemy.GetComponent<Champion>().dead)
+            Champion tempChamp = enemy.GetComponent<Champion>();
+            if (tempChamp)
             {
-                enemy = null;
+                if (tempChamp.dead)
+                {
+                    enemy = null;
+                }
             }
         }
 
@@ -138,49 +141,23 @@ public class Player : MonoBehaviour
             activeState.Execute(enemy, Time.deltaTime);
         }
 
-        if (targetPosition == Vector3.zero)
+        if ( enemy && !doingSkill)
         {
-            return;
+            if (Vector3.Distance(transform.position, enemy.position) < attackRange)
+            {
+                activeState = attackState;
+                attacking = true;
+            }
+            if (enemy.GetComponent<Champion>().dead)
+            {
+                activeState = idleState;
+                attacking = false;
+                enemy = null;
+            }
         }
-
-
-        if (Vector3.Distance(transform.position, targetPosition) < attackRange && enemy && !doingSkill)
-        {
-            activeState = attackState;
-        }
-        if (Vector3.Distance(transform.position, targetPosition) > attackRange && enemy)
-        {
-            activeState = moveState;
-        }
-
-        if (currentNode == path.Count -1 && Vector3.Distance(transform.position, targetPosition) < stopDistance && enemy == null)
-        {
-            activeState = idleState;
-        }
-
 
         activeState.Execute(enemy, Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, targetPosition) > stopDistance)
-        {
-            transform.position += (targetPosition - transform.position).normalized * Time.deltaTime *thisChampion.speed * 0.01f;
-
-        }
-        else
-        {
-            if(currentNode < path.Count - 1)
-            {
-                float angle = Vector3.Angle(transform.forward, path[currentNode].location - transform.position);
-
-                Vector3 rotation = new Vector3();
-                rotation.y = angle;
-
-                transform.Rotate(rotation);
-
-                currentNode++;
-                targetPosition = path[currentNode].location;
-            }
-        }
     }
 
 
@@ -190,57 +167,23 @@ public class Player : MonoBehaviour
 
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y,0));
 
-        if (Physics.SphereCast(ray, 0.5f,out hit, 100, ~(1 << LayerMask.NameToLayer("Player"))))
+        if (Physics.SphereCast(ray, 0.5f,out hit, 100, layerMask))
         {
 
             if (hit.point.x < 0) { return; }
             if (hit.point.z < 0) { return; }
 
-
-
-            if (Champion.CheckIfEnemy(hit.transform,thisChampion.team))
+            if (Champion.CheckIfEnemy(hit.transform, thisChampion.team))
             {
                 enemy = hit.transform;
-
-                if (Vector3.Distance(transform.position, enemy.position) > attackRange)
-                {
-                    activeState = moveState;
-                    path = PathfindingHandler.instance.GetPath(transform.position, enemy.position);
-
-                    if (path.Count > 0)
-                    {
-                        Vector3 temp = hit.point;
-                        temp.y = transform.position.y;
-
-                        currentNode = 1;
-
-                        targetPosition = path[currentNode].location;
-                        enemy = null;
-                    }
-
-                }
+                moveState.RecalculatePath(enemy.position);
             }
             else
             {
-                path = PathfindingHandler.instance.GetPath(transform.position, hit.point);
-
-                if (path.Count > 0)
-                {
-                    currentNode = 1;
-
-                    targetPosition = path[currentNode].location;
-                    enemy = null;
-                }
-
+                enemy = null;
+                moveState.RecalculatePath(hit.point);
             }
         }
-
-        float angle = Vector3.Angle(transform.forward, targetPosition - transform.position);
-
-        Vector3 rotation = new Vector3();
-        rotation.y = angle;
-
-        transform.Rotate(rotation);
 
         activeState = moveState;
     }
@@ -285,7 +228,6 @@ public class Player : MonoBehaviour
 
         GetComponent<VisualEffect>().SendEvent("Die");
         thisChampion.dead = true;
-        targetPosition = Vector3.zero;
 
         Invoke("Spawn", 5f);
     }
@@ -303,9 +245,4 @@ public class Player : MonoBehaviour
         thisChampion.dead = false;
     }
 
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position, targetPosition);
-    }
 }

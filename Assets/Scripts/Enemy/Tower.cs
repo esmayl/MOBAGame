@@ -49,6 +49,12 @@ public class Tower : MonoBehaviour
     {
         if (thisChampion.dead) { return; }
 
+        hits = Physics.OverlapSphere(transform.position, detectionRange, layerMask);
+        if (hits.Length > 0)
+        {
+            closest = Champion.GetClosestEnemy(transform.position, hits, thisCollider, thisChampion.team);
+        }
+
         if (closest != null)
         {
             if (closest.GetComponent<Champion>().dead) { closest = null; }
@@ -62,22 +68,11 @@ public class Tower : MonoBehaviour
 
         if (counter >= thisChampion.attackSpeed)
         {
-            if (!closest)
-            {
-                hits = Physics.OverlapSphere(transform.position, detectionRange, layerMask);
-
-                if (hits.Length > 0)
-                {
-                    closest = Champion.GetClosestEnemy(transform.position, hits, thisCollider, thisChampion.team);
-                }
-            }
-            else
+            if (closest)
             {
                 Attack();
                 counter = 0;
             }
-
-
         }
         else
         {

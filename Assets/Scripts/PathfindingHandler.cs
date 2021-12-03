@@ -94,7 +94,7 @@ public class PathfindingHandler : MonoBehaviour
         nodes.nodes = PathfindingInspector.Unflatten<Node>(temp, nodes.amountOfNodes, nodes.amountOfNodes);
     }
 
-    public void OnDrawGizmos()
+    public void OnDrawGizmosSelected()
     {
         nodeVector3 = new Vector3(nodes.nodeScale * 0.9f, transform.position.y + height, nodes.nodeScale * 0.9f);
 
@@ -137,6 +137,8 @@ public class PathfindingHandler : MonoBehaviour
 
         Node startNode = nodes.nodes[(int)startNodePos.x, (int)startNodePos.y];
         Node endNode = nodes.nodes[(int)endNodePos.x, (int)endNodePos.y];
+
+        if(startNode == endNode) { return null; }
 
         while (!endNode.walkable)
         {
@@ -235,8 +237,8 @@ public class PathfindingHandler : MonoBehaviour
     {
         List<Node> neighbourList = new List<Node>();
 
-        int currentX = (int)currentNode.location.x;
-        int currentY = (int)currentNode.location.z;
+        int currentX = (int)GetNodePosition(currentNode.location).x;
+        int currentY = (int)GetNodePosition(currentNode.location).y;
 
         if (currentX - 1 >= 0)
         {

@@ -14,13 +14,10 @@ public class Nodes : ScriptableObject
     public bool generated = false;
 
     [SerializeField]
-    [HideInInspector]
     public int amountOfNodes;
 
     public void GenerateNodes()
     {
-        amountOfNodes = 200;
-
         nodes = new Node[amountOfNodes, amountOfNodes];
         RaycastHit[] hits = new RaycastHit[1];
 

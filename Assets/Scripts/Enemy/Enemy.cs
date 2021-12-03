@@ -21,7 +21,6 @@ public class Enemy : MonoBehaviour
     VisualEffect enemyParticles;
     Vector3 temporarySpawnSave;
 
-    Vector3 targetPosition;
     Transform enemyTransform;
     Animator anim;
 
@@ -36,15 +35,9 @@ public class Enemy : MonoBehaviour
     Collider thisCollider;
     LayerMask layerMask;
 
-    List<Node> path = new List<Node>();
-    int currentNode = 0;
-    Vector3 direction;
-
     void Start()
     {
         temporarySpawnSave = transform.position;
-        targetPosition = endPos.position;
-
 
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
@@ -63,18 +56,15 @@ public class Enemy : MonoBehaviour
         attackState.enemyDead += EnemyDied;
 
         moveState = new MovementState(gameObject, thisChampion,anim);
-        moveState.beginMove += PlayMovementParticles;
+        //moveState.beginMove += PlayMovementParticles;
 
         layerMask = 1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Attackable");
 
         activeState = moveState;
 
-        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position, moveDiagonalCost, moveStraightCost);
+        moveState.RecalculatePath(endPos.position);
 
-        currentNode = 1;
-
-        direction = path[currentNode].location - transform.position;
-
+        enemyTransform = null;
     }
 
 
@@ -84,22 +74,6 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-
-        if (Vector3.Distance(transform.position, path[currentNode].location) < attackRange)
-        {
-            if (currentNode < path.Count - 1)
-            {
-                currentNode++;
-                direction = targetPosition - transform.position;
-                float angle = Vector3.Angle(transform.forward, direction);
-
-                Vector3 rotation = new Vector3();
-                rotation.y = angle;
-
-                transform.Rotate(rotation);
-            }
-        }
-
         if (enemyTransform)
         {
             if (enemyTransform.GetComponent<Champion>().dead)
@@ -107,11 +81,7 @@ public class Enemy : MonoBehaviour
                 activeState = moveState;
 
                 enemyTransform = null;
-
-                path = PathfindingHandler.instance.GetPath(transform.position, targetPosition, moveDiagonalCost, moveStraightCost);
-                currentNode = 1;
-                targetPosition = path[currentNode].location;
-
+                moveState.RecalculatePath(endPos.position);
             }
             else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
             {
@@ -120,19 +90,11 @@ public class Enemy : MonoBehaviour
             else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
             {
                 activeState = moveState;
-
-                targetPosition = enemyTransform.position;
             }
             else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
             {
                 activeState = moveState;
-
-                enemyTransform = null;
-
-                path = PathfindingHandler.instance.GetPath(transform.position, targetPosition, moveDiagonalCost, moveStraightCost);
-                currentNode = 1;
-                targetPosition = path[currentNode].location;
-
+                moveState.RecalculatePath(endPos.position);
             }
         }
 
@@ -140,17 +102,15 @@ public class Enemy : MonoBehaviour
         {
             activeState = moveState;
 
-            targetPosition = path[currentNode].location;
-
             hits = Physics.OverlapSphere(transform.position, detectionRange, layerMask);
 
             if (hits.Length > 0)
             {
 
                 enemyTransform = Champion.GetClosestEnemy(transform.position, hits, thisCollider, thisChampion.team);
-                if (enemyTransform)
+                if (enemyTransform != null)
                 {
-                    targetPosition = enemyTransform.position;
+                    moveState.RecalculatePath(enemyTransform.position);
                 }
             }
         }
@@ -158,12 +118,6 @@ public class Enemy : MonoBehaviour
 
 
         activeState.Execute(enemyTransform, Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, targetPosition) > attackRange)
-        {
-            transform.position += direction * Time.deltaTime;
-        }
-
     }
 
     void PlayMovementParticles()
@@ -185,9 +139,7 @@ public class Enemy : MonoBehaviour
     void ResetPathfinding()
     {
         enemyTransform = null;
-        path = PathfindingHandler.instance.GetPath(transform.position, endPos.position, moveDiagonalCost, moveStraightCost);
-        currentNode = 1;
-        targetPosition = path[currentNode].location;
+        moveState.RecalculatePath(endPos.position);
     }
 
     void Respawn()
@@ -245,4 +197,5 @@ public class Enemy : MonoBehaviour
 
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
     }
+
 }

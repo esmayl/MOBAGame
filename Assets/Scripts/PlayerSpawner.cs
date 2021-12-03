@@ -35,9 +35,10 @@ public class PlayerSpawner : MonoBehaviour
 
             if (info.name == "Ahri")
             {
-                temp.AddComponent<Player>();
                 temp.layer = LayerMask.NameToLayer("Player");
                 cameraInstance.GetComponent<PlayerCamera>().playerTransform = temp.transform;
+
+                GetComponent<GameHandler>().thisPlayer = temp.AddComponent<Player>();
             }
 
         }

@@ -15,6 +15,6 @@ MonoBehaviour:
   blockingMask:
     serializedVersion: 2
     m_Bits: 320
-  nodeScale: 1
+  nodeScale: 0.5
   generated: 1
-  amountOfNodes: 200
+  amountOfNodes: 400
