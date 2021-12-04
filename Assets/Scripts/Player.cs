@@ -155,8 +155,12 @@ public class Player : MonoBehaviour
                 enemy = null;
             }
         }
-
-        activeState.Execute(enemy, Time.deltaTime);
+        
+        if (!enemy && moveState.ReachedEnd())
+        {
+            activeState = idleState;
+            attacking = false;
+        }
 
     }
 
