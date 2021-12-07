@@ -7,7 +7,7 @@ public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance;
     public Canvas winScreen;
-    public Player thisPlayer;
+    [HideInInspector]public Player thisPlayer;
 
     void Awake()
     {

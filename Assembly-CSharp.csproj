@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
     <Compile Include="Assets\Scripts\PathfindingHandler.cs" />
     <Compile Include="Assets\Scripts\UIHandler.cs" />
+    <Compile Include="Assets\InputHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

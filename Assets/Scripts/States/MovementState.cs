@@ -37,7 +37,7 @@ public class MovementState : PlayerState
         if(!thisAgent.CalculatePath(targetPos, path)) 
         {
             NavMeshHit navMeshHit;
-            if (NavMesh.SamplePosition(targetPos, out navMeshHit, 10, -1))
+            if (NavMesh.SamplePosition(targetPos, out navMeshHit, 10, NavMesh.AllAreas))
             {
                 Debug.Log(navMeshHit.position);
 
