@@ -35,8 +35,6 @@ public class Player : MonoBehaviour
 
     Slider qIcon;
 
-    PlayerInput input;
-
     public Skill[] skillPrefabs;
     public SkillState[] skills;
     GameObject[] skillInstances;
@@ -46,13 +44,11 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        input = GetComponent<PlayerInput>();
-        input.ActivateInput();
 
-        InputAction mouseMove = input.actions.FindAction("Move");
+        InputAction mouseMove = InputHandler.instance.playerInputs.actions.FindAction("Move");
         mouseMove.performed += SetMovePos;
 
-        InputAction qAction = input.actions.FindAction("Q");
+        InputAction qAction = InputHandler.instance.playerInputs.actions.FindAction("Q");
         qAction.performed += DoQ;
 
         temporarySpawnSave = transform.position;
@@ -155,14 +151,19 @@ public class Player : MonoBehaviour
                 enemy = null;
             }
         }
-
-        activeState.Execute(enemy, Time.deltaTime);
+        
+        if (!enemy && moveState.ReachedEnd())
+        {
+            activeState = idleState;
+            attacking = false;
+        }
 
     }
 
 
     public void SetMovePos(InputAction.CallbackContext context)
     {
+        Debug.Log("1516");
         if (thisChampion.dead) { return; }
 
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y,0));

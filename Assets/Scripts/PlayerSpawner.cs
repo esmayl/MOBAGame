@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerSpawner : MonoBehaviour
 {
     public BasicInformation[] championStatArray;
-    public GameObject championsObj;
     public GameObject baseChampion;
     public GameObject cameraPrefab;
 
@@ -15,8 +14,6 @@ public class PlayerSpawner : MonoBehaviour
 
     void Awake()
     {
-        //Instantiate(championsObj);
-
         Vector3 spawnBase = transform.position;
 
         cameraInstance = Instantiate(cameraPrefab, transform.position, Quaternion.identity);
@@ -24,9 +21,8 @@ public class PlayerSpawner : MonoBehaviour
 
         foreach(BasicInformation info in championStatArray)
         {
-            Vector3 variation = new Vector3(Random.Range(spawnBase.x, 10), 0, Random.Range(spawnBase.z, 10));
             GameObject temp = Instantiate(baseChampion);
-            temp.transform.position = spawnBase + variation;
+            temp.transform.position = spawnBase;
             temp.name = info.name;
             temp.tag = "Enemy";
             temp.layer = LayerMask.NameToLayer("Attackable");
@@ -44,11 +40,5 @@ public class PlayerSpawner : MonoBehaviour
         }
 
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
