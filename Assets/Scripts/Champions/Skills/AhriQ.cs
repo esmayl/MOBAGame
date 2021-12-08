@@ -9,6 +9,11 @@ public class AhriQ : SkillState
     {
         this.shot = shot;
         this.shot.SetActive(false);
+        
+        this.anim = anim;
+
+        this.thisChampion = thisChampion;
+        this.player = player;
 
         cooldown = 5f;
         counter = cooldown;

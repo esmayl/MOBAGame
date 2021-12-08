@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
 
     float attackRange = 3;
     VisualEffect playerParticles;
-    Vector3 temporarySpawnSave;
+    public Vector3 temporarySpawnSave;
     Transform enemy;
 
     public Champion thisChampion;
@@ -35,7 +35,6 @@ public class Player : MonoBehaviour
 
     Slider qIcon;
 
-    public Skill[] skillPrefabs;
     public SkillState[] skills;
     GameObject[] skillInstances;
 
@@ -50,8 +49,6 @@ public class Player : MonoBehaviour
 
         InputAction qAction = InputHandler.instance.playerInputs.actions.FindAction("Q");
         qAction.performed += DoQ;
-
-        temporarySpawnSave = transform.position;
 
         playerParticles = GetComponent<VisualEffect>();
 
@@ -78,24 +75,23 @@ public class Player : MonoBehaviour
         layerMask = 1 << LayerMask.NameToLayer("Ground");
         layerMask |= 1 << LayerMask.NameToLayer("Attackable");
 
-        //if(skillPrefabs.Length <= 0)
-        //{
-        //	return;
-        //}
+        skills = new SkillState[1];
 
-        //skills = new SkillState[4];
+        //Instantiate all skillPrefabs
+        skillInstances = new GameObject[1];
+        int i = 0;
 
-        ////Instantiate all skillPrefabs
-        //skillInstances = new GameObject[skillPrefabs.Length];
-        //int i = 0;
+        skillInstances[0] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        skillInstances[0].AddComponent<SkillShotProjectile>();
+        Destroy(skillInstances[0].GetComponent<Collider>());
 
         //foreach (Skill g in skillPrefabs)
         //{
-        //	skillInstances[i] = Instantiate(g.skillPrefab);
-        //	i++;
+        //    skillInstances[i] = Instantiate(g.skillPrefab);
+        //    i++;
         //}
 
-        //skills[0] = new AhriQ(gameObject, this, anim, skillInstances[0]);
+        skills[0] = new AhriQ(gameObject, thisChampion, thisChampion.anim, skillInstances[0]);
         //skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
         //skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
         //skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
@@ -117,25 +113,14 @@ public class Player : MonoBehaviour
             }
         }
 
-        //foreach (SkillState s in thisChampion.skills)
-        //{
-        //    s.counter += Time.deltaTime;
-        //}
+        foreach (SkillState s in skills)
+        {
+            s.counter += Time.deltaTime;
+        }
 
         attackState.counter += Time.deltaTime;
-        doingSkill = false;
 
-        //qIcon.value = 1 / (thisChampion.skills[0].cooldown / thisChampion.skills[0].counter);
-
-        if (doingSkill)
-        {
-            skills[0].Execute(null, Time.deltaTime);
-            doingSkill = false;
-        }
-        else
-        {
-            activeState.Execute(enemy, Time.deltaTime);
-        }
+        qIcon.value = 1 / (skills[0].cooldown / skills[0].counter);
 
         if ( enemy && !doingSkill)
         {
@@ -158,12 +143,21 @@ public class Player : MonoBehaviour
             attacking = false;
         }
 
+        if (doingSkill)
+        {
+            skills[0].Execute(null, Time.deltaTime);
+            doingSkill = false;
+        }
+        else
+        {
+            activeState.Execute(enemy, Time.deltaTime);
+        }
+
     }
 
 
     public void SetMovePos(InputAction.CallbackContext context)
     {
-        Debug.Log("1516");
         if (thisChampion.dead) { return; }
 
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y,0));

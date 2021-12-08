@@ -21,6 +21,7 @@ public class SkillShotProjectile : MonoBehaviour
         if (counter >= lifetime) { counter = 0; CancelInvoke(); gameObject.SetActive(false); } else { counter += Time.deltaTime; }
 
         transform.Translate(Vector3.forward * (speed * 0.01f) * Time.deltaTime);
+        transform.LookAt(transform.position + transform.forward);
 
     }
 
@@ -28,7 +29,11 @@ public class SkillShotProjectile : MonoBehaviour
     {
         hits = new Collider[1];
         InvokeRepeating("DetectHit", 0, 0.1f);
-        GetComponent<VisualEffect>().SendEvent("OnPlay");
+
+        if (GetComponent<VisualEffect>())
+        {
+            GetComponent<VisualEffect>().SendEvent("OnPlay");
+        }
     }
 
     void DetectHit()

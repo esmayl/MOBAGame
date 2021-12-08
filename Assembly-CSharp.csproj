@@ -62,13 +62,14 @@
     <Compile Include="Assets\Scripts\Champions\Skills\AhriE.cs" />
     <Compile Include="Assets\Scripts\Nodes.cs" />
     <Compile Include="Assets\Free UI build package\Script\Togglescript.cs" />
-    <Compile Include="Assets\GameHandler.cs" />
+    <Compile Include="Assets\Scripts\GameHandler.cs" />
     <Compile Include="Assets\Scripts\Champions\Champion.cs" />
     <Compile Include="Assets\Scripts\Projectiles\SkillShotProjectile.cs" />
     <Compile Include="Assets\Scripts\States\IdleState.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Champions\Skills\AhriW.cs" />
     <Compile Include="Assets\Scripts\PlayerSpawner.cs" />
+    <Compile Include="Assets\Scripts\InputHandler.cs" />
     <Compile Include="Assets\Scripts\States\SkillState.cs" />
     <Compile Include="Assets\Scripts\HealthBar.cs" />
     <Compile Include="Assets\Free UI build package\Script\Slide.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
     <Compile Include="Assets\Scripts\PathfindingHandler.cs" />
     <Compile Include="Assets\Scripts\UIHandler.cs" />
-    <Compile Include="Assets\InputHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

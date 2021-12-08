@@ -35,6 +35,8 @@ public class PlayerSpawner : MonoBehaviour
                 cameraInstance.GetComponent<PlayerCamera>().playerTransform = temp.transform;
 
                 GetComponent<GameHandler>().thisPlayer = temp.AddComponent<Player>();
+                temp.GetComponent<Player>().temporarySpawnSave = spawnBase;
+
             }
 
         }
