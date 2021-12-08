@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
     RaycastHit hit;
     bool doingSkill = false;
 
-    Slider qIcon;
+    Image qIcon;
 
     public SkillState[] skills;
     GameObject[] skillInstances;
@@ -67,8 +67,7 @@ public class Player : MonoBehaviour
 
         idleState = new IdleState(gameObject, thisChampion, thisChampion.anim);
 
-        qIcon = GameObject.Find("Qicon").GetComponent<Slider>();
-        //qIcon.value = 1 - (thisChampion.skills[0].cooldown/thisChampion.skills[0].counter);
+        qIcon = GameObject.Find("Q").transform.GetChild(0).GetComponent<Image>();
 
         activeState = idleState;
 
@@ -95,6 +94,8 @@ public class Player : MonoBehaviour
         //skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
         //skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
         //skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
+
+        qIcon.fillAmount = 1 - (skills[0].cooldown / skills[0].counter);
     }
 
     void Update()
@@ -120,7 +121,7 @@ public class Player : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-        qIcon.value = 1 / (skills[0].cooldown / skills[0].counter);
+        qIcon.fillAmount = 1 / (skills[0].cooldown / skills[0].counter);
 
         if ( enemy && !doingSkill)
         {

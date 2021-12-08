@@ -19,7 +19,7 @@ public class PlayerCamera : MonoBehaviour
         InputAction scrollAction = InputHandler.instance.playerInputs.actions.FindAction("Zoom");
         scrollAction.performed += SetZoom;
 
-        transform.eulerAngles = new Vector3(42.271f, 0, 0);
+        transform.eulerAngles = new Vector3(50, 0, 0);
         distance = new Vector3(-0.81f, 9.55f, -7.06f);
         zoomedDistance = distance;
 
@@ -32,7 +32,6 @@ public class PlayerCamera : MonoBehaviour
 
     public void SetZoom(InputAction.CallbackContext context)
     {
-        Debug.Log(context.ReadValue<Vector2>());
         zoom -= context.ReadValue<Vector2>().y * 0.005f;
         zoomedDistance = distance;
         zoomedDistance.y *= zoom;
