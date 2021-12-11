@@ -54,6 +54,8 @@ public class MovementState : PlayerState
 
 	public override void Execute (Transform targetPos,float deltaTime) 
 	{
+        if(currentNode >= path.corners.Length) { return; }
+
         normalizedDir = (path.corners[currentNode] - player.transform.position).normalized;
         normalizedDir.y = player.transform.position.y;
 
@@ -66,8 +68,6 @@ public class MovementState : PlayerState
         {
             player.transform.LookAt(lookPos);
             
-            anim.SetBool("Moving", true);
-
             player.transform.position += normalizedDir * Time.deltaTime * thisChampion.speed * 0.01f;
 
         }

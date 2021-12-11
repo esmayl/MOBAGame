@@ -143,7 +143,7 @@ public class Player : MonoBehaviour
         {
             championSkills.R();
         }
-        else
+        else if(!thisChampion.dead)
         {
             activeState.Execute(enemy, Time.deltaTime);
         }
@@ -172,6 +172,8 @@ public class Player : MonoBehaviour
         }
 
         activeState = moveState;
+        thisChampion.anim.SetBool("Moving", true); // Fix to stop moving without animation after skill usage
+
     }
 
     public void QCallback(InputAction.CallbackContext context)
@@ -179,7 +181,7 @@ public class Player : MonoBehaviour
         if (thisChampion.dead) { return; }
         if (championSkills.QOnCooldown()) { return; }
 
-        Invoke("SetCooldownQ", championSkills.skills[0].castTime);
+        Invoke("QOver", championSkills.skills[0].castTime);
 
         Debug.Log("Doing Q");
         moveState.Stop();
@@ -192,7 +194,7 @@ public class Player : MonoBehaviour
         if (thisChampion.dead) { return; }
         if (championSkills.WOnCooldown()) { return; }
 
-        Invoke("SetCooldownW", championSkills.skills[1].castTime);
+        Invoke("WOver", championSkills.skills[1].castTime);
 
         Debug.Log("Doing W");
 
@@ -206,7 +208,7 @@ public class Player : MonoBehaviour
         if (thisChampion.dead) { return; }
         if (championSkills.EOnCooldown()) { return; }
 
-        Invoke("SetCooldownE", championSkills.skills[2].castTime);
+        Invoke("EOver", championSkills.skills[2].castTime);
 
         Debug.Log("Doing E");
 
@@ -220,7 +222,7 @@ public class Player : MonoBehaviour
         if (thisChampion.dead) { return; }
         if (championSkills.ROnCooldown()) { return; }
 
-        Invoke("SetCooldownR", championSkills.skills[3].castTime);
+        Invoke("ROver", championSkills.skills[3].castTime);
 
         Debug.Log("Doing R");
 
@@ -255,17 +257,21 @@ public class Player : MonoBehaviour
     {
         if (thisChampion.dead) { return; }
 
-        transform.position = temporarySpawnSave;
-        enemy = null;
+        thisChampion.dead = true;
 
         GetComponent<VisualEffect>().SendEvent("Die");
-        thisChampion.dead = true;
+
+        GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
 
         Invoke("Spawn", 5f);
     }
 
     void Spawn()
     {
+        GetComponent<NavMeshAgent>().Warp(temporarySpawnSave);
+
+        enemy = null;
+
         GetComponent<Collider>().enabled = true;
         foreach (Transform child in transform)
         {
@@ -277,22 +283,22 @@ public class Player : MonoBehaviour
         thisChampion.dead = false;
     }
 
-    void SetCooldownQ()
+    void QOver()
     {
         doingQ = false;
     }
 
-    void SetCooldownW()
+    void WOver()
     {
         doingW = false;
     }
 
-    void SetCooldownE()
+    void EOver()
     {
         doingE = false;
     }
 
-    void SetCooldownR()
+    void ROver()
     {
         doingR = false;
     }

@@ -40,11 +40,17 @@ public class Ahri : ChampionSkills
         eIcon = GameObject.Find("E").transform.GetChild(0).GetComponent<Image>();
         rIcon = GameObject.Find("R").transform.GetChild(0).GetComponent<Image>();
 
+        levelText = GameObject.Find("Level").GetComponent<Text>();
+        expBar = GameObject.Find("ExpBar").GetComponent<Image>();
+
 
         qIcon.fillAmount = (skills[0].counter / skills[0].cooldown);
         wIcon.fillAmount = (skills[1].counter / skills[1].cooldown);
         eIcon.fillAmount = (skills[2].counter / skills[2].cooldown);
         rIcon.fillAmount = (skills[3].counter / skills[3].cooldown);
+
+        levelText.text = ""+thisChampion.level;
+        expBar.fillAmount = thisChampion.LevelProgress();
 
     }
 
@@ -61,6 +67,9 @@ public class Ahri : ChampionSkills
         wIcon.fillAmount = (skills[1].counter / skills[1].cooldown);
         eIcon.fillAmount = (skills[2].counter / skills[2].cooldown);
         rIcon.fillAmount = (skills[3].counter / skills[3].cooldown);
+
+        levelText.text = "" + thisChampion.level;
+        expBar.fillAmount = thisChampion.LevelProgress();
     }
 
     public override void Q()

@@ -19,7 +19,7 @@ public class PlayerCamera : MonoBehaviour
         scrollAction.performed += SetZoom;
 
         transform.eulerAngles = new Vector3(50, 0, 0);
-        distance = new Vector3(-0.81f, 9.55f, -7.06f);
+        distance = new Vector3(0, 9.55f, -7f);
         zoomedDistance = distance;
 
     }

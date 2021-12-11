@@ -8,11 +8,9 @@ using UnityEngine.VFX;
 public class Enemy : MonoBehaviour
 {
     public Transform endPos;
-    public int moveStraightCost = 10;
-    public int moveDiagonalCost = 10;
 
     float attackRange = 3f;
-    float detectionRange = 7f;
+    float detectionRange = 9f;
     float expRange = 15;
 
     VisualEffect enemyParticles;
@@ -69,6 +67,28 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
+        if (enemyTransform)
+        {
+
+            if (enemyTransform.GetComponent<Champion>().dead)
+            {
+                activeState = moveState;
+
+                enemyTransform = null;
+                moveState.RecalculatePath(endPos.position);
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
+            {
+                activeState = attackState;
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange*2)
+            {
+                activeState = moveState;
+                enemyTransform = null;
+                moveState.RecalculatePath(endPos.position);
+            }
+        }
+
         if (!enemyTransform)
         {
             activeState = moveState;
@@ -84,30 +104,9 @@ public class Enemy : MonoBehaviour
                     moveState.RecalculatePath(enemyTransform.position);
                 }
             }
-        }
-
-        if (enemyTransform)
-        {
-
-            if (enemyTransform.GetComponent<Champion>().dead)
+            else
             {
                 activeState = moveState;
-
-                enemyTransform = null;
-                moveState.RecalculatePath(endPos.position);
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
-            {
-                activeState = attackState;
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
-            {
-                activeState = moveState;
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange*2)
-            {
-                activeState = moveState;
-                enemyTransform = null;
                 moveState.RecalculatePath(endPos.position);
             }
         }
@@ -167,7 +166,7 @@ public class Enemy : MonoBehaviour
 
     void Spawn()
     {
-        transform.position = temporarySpawnSave;
+        GetComponent<NavMeshAgent>().Warp(temporarySpawnSave);
 
         thisChampion.dead = false;
 
@@ -198,6 +197,7 @@ public class Enemy : MonoBehaviour
                 if (champComponent.GetComponent<Player>() && champComponent.team != thisChampion.team)
                 {
                     champComponent.GainExp(thisChampion.bi.expWorth);
+                    Debug.Log(champComponent.name + " Gained exp " + thisChampion.bi.expWorth);
                 }
             }
         }

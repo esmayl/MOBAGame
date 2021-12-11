@@ -25,6 +25,12 @@ public class ChampionSkills : MonoBehaviour
     [HideInInspector]
     public Image rIcon;
 
+    [HideInInspector]
+    public Text levelText;
+
+    [HideInInspector]
+    public Image expBar;
+
     public virtual void Init()
     {
 

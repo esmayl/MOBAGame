@@ -16,8 +16,6 @@ public class Champion : MonoBehaviour
 
 	public Animator anim;
 
-
-
 	int[] expPerLevel = new int[]
 	{
 		0,
@@ -106,6 +104,11 @@ public class Champion : MonoBehaviour
 		UpdateStats();
 	}
 
+	public float LevelProgress()
+    {
+		return (float)exp / (float)expPerLevel[level];
+    }
+
 	public void Die()
 	{
 
@@ -148,41 +151,6 @@ public class Champion : MonoBehaviour
 		bi.damageReductionMR = (float)hp/bi.effectiveHealthMR;
 		bi.realDamageMR = bi.damageReductionMR;	
 	}
-
-	//void OnGUI ()
-	//{
-
-
-	//	healthString = bi.currentHp.ToString();
-	//	armorString = bi.armor.ToString();	
-	//	magicResistString = bi.magicResist.ToString();	
-	//	damageString = bi.damage.ToString();	
-	//	ArmorPenPercentString = bi.armorPenPc.ToString();
-	//	ArmorPenFlatString = bi.armorPenFlat.ToString();	
-
-	//	GUI.Window(0,new Rect(10,10,200,300),DoMyWindow,"Stats");
-
-
-	//}
-
-	//void DoMyWindow(int windowID)
-	//{
-	//	GUI.Label(new Rect(20, 30, 200, 20), "Health: ");
-	//	GUI.Label(new Rect(20, 50, 200, 20), "Armor: ");
-	//	GUI.Label(new Rect(20, 70, 200, 20), "MagicResist: ");
-	//	GUI.Label(new Rect(20, 90, 200, 20), "AD: ");
-	//	GUI.Label(new Rect(20, 110, 200, 20), "ArmorPen Percent: ");
-	//	GUI.Label(new Rect(20, 130, 200, 20), "ArmorPen Flat: ");
-	//	GUI.Label(new Rect(20, 150, 200, 20), "Damage: " + Mathf.Round(bi.realDamageAR));
-
-	//	GUI.Label(new Rect(160, 30, 40, 20), healthString);
-	//	GUI.Label(new Rect(160, 50, 40, 20), armorString);
-	//	GUI.Label(new Rect(160, 70, 40, 20), magicResistString);
-	//	GUI.Label(new Rect(160, 90, 40, 20), damageString);
-	//	GUI.Label(new Rect(160, 110, 40, 20), ArmorPenPercentString);
-	//	GUI.Label(new Rect(160, 130, 40, 20), ArmorPenFlatString);
-	//}
-
 
 	public static Transform GetClosestEnemy(Vector3 thisPos, Collider[] enemies, Collider thisCollider, Team thisTeam)
 	{

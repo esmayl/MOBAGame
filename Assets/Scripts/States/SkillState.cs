@@ -11,6 +11,7 @@ public class SkillState
     internal float counter;
     public float cooldown;
     public float castTime;
+    public float skillDelay;
 
     public SkillState(GameObject player, Champion thisChampion, Animator anim)
     {

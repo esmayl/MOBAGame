@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class AhriQ : SkillState
@@ -18,13 +20,13 @@ public class AhriQ : SkillState
         cooldown = 5f;
         counter = cooldown;
         castTime = 1.25f;
+        skillDelay = 0.5f;
     }
 
     public override void Execute(Transform targetTransform, float deltaTime)
     {
         if(counter < cooldown) { return; }
 
-        SkillShotProjectile temp = shot.GetComponent<SkillShotProjectile>();
 
         anim.SetBool("Moving", false);
 
@@ -32,8 +34,18 @@ public class AhriQ : SkillState
 
         counter = 0;
 
+        Shoot();
+    }
+
+    async void Shoot()
+    {
+
+        await Task.Delay(TimeSpan.FromSeconds(skillDelay));
+
+        SkillShotProjectile temp = shot.GetComponent<SkillShotProjectile>();
+
         shot.SetActive(true);
-        shot.transform.position = player.transform.position + (Vector3.up*0.5f);
+        shot.transform.position = player.transform.position + (Vector3.up * 0.5f);
         shot.transform.rotation = player.transform.rotation;
 
         temp.Reset();
