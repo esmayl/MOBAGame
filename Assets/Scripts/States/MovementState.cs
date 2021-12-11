@@ -18,16 +18,18 @@ public class MovementState : PlayerState
 
     //List<Node> path = new List<Node>();
     int currentNode = 0;
-    float stopDistance = 1f;
+    float stopDistance = 0.7f;
 
 	internal MovementState(GameObject player, Champion thisChampion, Animator anim) : base(player, thisChampion, anim)
     {
 		this.player = player;
         thisAgent = player.AddComponent<NavMeshAgent>();
         thisAgent.baseOffset = 0.5f;
-        thisAgent.radius = 0.5f;
+        thisAgent.radius = 0.7f;
         thisAgent.autoBraking = false;
         thisAgent.autoRepath = false;
+        thisAgent.autoTraverseOffMeshLink = false;
+        thisAgent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
         path = new NavMeshPath();
     }
 
@@ -47,11 +49,13 @@ public class MovementState : PlayerState
             }
         }
         currentNode = 1;
+        thisAgent.isStopped = false;
     }
 
 	public override void Execute (Transform targetPos,float deltaTime) 
 	{
         normalizedDir = (path.corners[currentNode] - player.transform.position).normalized;
+        normalizedDir.y = player.transform.position.y;
 
         lookPos = player.transform.position + normalizedDir;
         lookPos.y = player.transform.position.y;
@@ -61,6 +65,9 @@ public class MovementState : PlayerState
         if (Vector3.Distance(player.transform.position, path.corners[currentNode]) > stopDistance)
         {
             player.transform.LookAt(lookPos);
+            
+            anim.SetBool("Moving", true);
+
             player.transform.position += normalizedDir * Time.deltaTime * thisChampion.speed * 0.01f;
 
         }
@@ -73,7 +80,6 @@ public class MovementState : PlayerState
             }
         }
 
-        anim.SetBool("Moving", true);
 
 		endMove?.Invoke();
 	}
@@ -86,5 +92,13 @@ public class MovementState : PlayerState
         }
 
         return false;
+    }
+
+    public void Stop()
+    {
+        thisAgent.CalculatePath(player.transform.position,path);
+        currentNode = 0;
+        thisAgent.isStopped = true;
+        thisAgent.velocity = Vector3.zero;
     }
 }

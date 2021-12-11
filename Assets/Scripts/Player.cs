@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     Transform enemy;
 
     public Champion thisChampion;
+    ChampionSkills championSkills;
 
     NavMeshAgent agent;
 
@@ -31,12 +32,10 @@ public class Player : MonoBehaviour
     Collider[] hits;
 
     RaycastHit hit;
-    bool doingSkill = false;
-
-    Image qIcon;
-
-    public SkillState[] skills;
-    GameObject[] skillInstances;
+    bool doingQ = false;
+    bool doingW = false;
+    bool doingE = false;
+    bool doingR = false;
 
 
     bool attacking = false;
@@ -47,16 +46,30 @@ public class Player : MonoBehaviour
         InputAction mouseMove = InputHandler.instance.playerInputs.actions.FindAction("Move");
         mouseMove.performed += SetMovePos;
 
-        InputAction qAction = InputHandler.instance.playerInputs.actions.FindAction("Q");
-        qAction.performed += DoQ;
+        InputAction skillAction = InputHandler.instance.playerInputs.actions.FindAction("Q");
+        skillAction.performed += QCallback;
+
+        skillAction = InputHandler.instance.playerInputs.actions.FindAction("W");
+        skillAction.performed += WCallback;
+
+        skillAction = InputHandler.instance.playerInputs.actions.FindAction("E");
+        skillAction.performed += ECallback;
+
+        skillAction = InputHandler.instance.playerInputs.actions.FindAction("R");
+        skillAction.performed += RCallback;
 
         playerParticles = GetComponent<VisualEffect>();
 
         thisChampion = GetComponent<Champion>();
-        thisChampion.Init();
+        if (!thisChampion.anim)
+        {
+            thisChampion.Init();
+        }
 
         thisChampion.championDeath += Respawn;
         thisChampion.levelUp += PlayLevelUpParticles;
+
+        championSkills = GetComponent<ChampionSkills>();
 
         attackState = new AttackState(gameObject, thisChampion, thisChampion.anim);
         attackState.enemyDead += EnemyDied;
@@ -67,35 +80,12 @@ public class Player : MonoBehaviour
 
         idleState = new IdleState(gameObject, thisChampion, thisChampion.anim);
 
-        qIcon = GameObject.Find("Q").transform.GetChild(0).GetComponent<Image>();
-
         activeState = idleState;
 
         layerMask = 1 << LayerMask.NameToLayer("Ground");
         layerMask |= 1 << LayerMask.NameToLayer("Attackable");
 
-        skills = new SkillState[1];
 
-        //Instantiate all skillPrefabs
-        skillInstances = new GameObject[1];
-        int i = 0;
-
-        skillInstances[0] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        skillInstances[0].AddComponent<SkillShotProjectile>();
-        Destroy(skillInstances[0].GetComponent<Collider>());
-
-        //foreach (Skill g in skillPrefabs)
-        //{
-        //    skillInstances[i] = Instantiate(g.skillPrefab);
-        //    i++;
-        //}
-
-        skills[0] = new AhriQ(gameObject, thisChampion, thisChampion.anim, skillInstances[0]);
-        //skills[1] = new AhriW(gameObject, this, anim, skillInstances[1]);
-        //skills[2] = new AhriE(gameObject, this, anim, skillInstances[2]);
-        //skills[3] = new AhriR(gameObject, this, anim, skillInstances[3]);
-
-        qIcon.fillAmount = 1 - (skills[0].cooldown / skills[0].counter);
     }
 
     void Update()
@@ -114,16 +104,9 @@ public class Player : MonoBehaviour
             }
         }
 
-        foreach (SkillState s in skills)
-        {
-            s.counter += Time.deltaTime;
-        }
-
         attackState.counter += Time.deltaTime;
 
-        qIcon.fillAmount = 1 / (skills[0].cooldown / skills[0].counter);
-
-        if ( enemy && !doingSkill)
+        if ( enemy && !doingQ && !doingW && !doingE && !doingR)
         {
             if (Vector3.Distance(transform.position, enemy.position) < attackRange)
             {
@@ -144,10 +127,21 @@ public class Player : MonoBehaviour
             attacking = false;
         }
 
-        if (doingSkill)
+        if (doingQ)
         {
-            skills[0].Execute(null, Time.deltaTime);
-            doingSkill = false;
+            championSkills.Q();
+        }
+        else if (doingW)
+        {
+            championSkills.W();
+        }
+        else if (doingE)
+        {
+            championSkills.E();
+        }
+        else if (doingR)
+        {
+            championSkills.R();
         }
         else
         {
@@ -165,10 +159,6 @@ public class Player : MonoBehaviour
 
         if (Physics.SphereCast(ray, 0.5f,out hit, 100, layerMask))
         {
-
-            if (hit.point.x < 0) { return; }
-            if (hit.point.z < 0) { return; }
-
             if (Champion.CheckIfEnemy(hit.transform, thisChampion.team))
             {
                 enemy = hit.transform;
@@ -184,13 +174,59 @@ public class Player : MonoBehaviour
         activeState = moveState;
     }
 
-    public void DoQ(InputAction.CallbackContext context)
+    public void QCallback(InputAction.CallbackContext context)
     {
         if (thisChampion.dead) { return; }
+        if (championSkills.QOnCooldown()) { return; }
+
+        Invoke("SetCooldownQ", championSkills.skills[0].castTime);
 
         Debug.Log("Doing Q");
+        moveState.Stop();
 
-        doingSkill = true;
+        doingQ = true;
+    }
+
+    public void WCallback(InputAction.CallbackContext context)
+    {
+        if (thisChampion.dead) { return; }
+        if (championSkills.WOnCooldown()) { return; }
+
+        Invoke("SetCooldownW", championSkills.skills[1].castTime);
+
+        Debug.Log("Doing W");
+
+        moveState.Stop();
+
+        doingW = true;
+    }
+
+    public void ECallback(InputAction.CallbackContext context)
+    {
+        if (thisChampion.dead) { return; }
+        if (championSkills.EOnCooldown()) { return; }
+
+        Invoke("SetCooldownE", championSkills.skills[2].castTime);
+
+        Debug.Log("Doing E");
+
+        moveState.Stop();
+
+        doingE = true;
+    }
+
+    public void RCallback(InputAction.CallbackContext context)
+    {
+        if (thisChampion.dead) { return; }
+        if (championSkills.ROnCooldown()) { return; }
+
+        Invoke("SetCooldownR", championSkills.skills[3].castTime);
+
+        Debug.Log("Doing R");
+
+        moveState.Stop();
+
+        doingR = true;
     }
 
 
@@ -241,4 +277,23 @@ public class Player : MonoBehaviour
         thisChampion.dead = false;
     }
 
+    void SetCooldownQ()
+    {
+        doingQ = false;
+    }
+
+    void SetCooldownW()
+    {
+        doingW = false;
+    }
+
+    void SetCooldownE()
+    {
+        doingE = false;
+    }
+
+    void SetCooldownR()
+    {
+        doingR = false;
+    }
 }

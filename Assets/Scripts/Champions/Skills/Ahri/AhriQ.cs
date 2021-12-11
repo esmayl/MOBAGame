@@ -17,6 +17,7 @@ public class AhriQ : SkillState
 
         cooldown = 5f;
         counter = cooldown;
+        castTime = 1.25f;
     }
 
     public override void Execute(Transform targetTransform, float deltaTime)
@@ -25,9 +26,11 @@ public class AhriQ : SkillState
 
         SkillShotProjectile temp = shot.GetComponent<SkillShotProjectile>();
 
-        counter = 0;
-
         anim.SetBool("Moving", false);
+
+        anim.SetTrigger("Q");
+
+        counter = 0;
 
         shot.SetActive(true);
         shot.transform.position = player.transform.position + (Vector3.up*0.5f);
@@ -40,5 +43,10 @@ public class AhriQ : SkillState
         temp.team = player.GetComponent<Champion>().team;
         temp.owner = player.GetComponent<Champion>();
         temp.lifetime = 3f;
+    }
+
+    public override bool OnCooldown()
+    {
+        return base.OnCooldown();
     }
 }

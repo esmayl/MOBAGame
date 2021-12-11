@@ -15,9 +15,6 @@ public class Enemy : MonoBehaviour
     float detectionRange = 7f;
     float expRange = 15;
 
-    NavMeshAgent agent;
-    NavMeshPath debuggingPath;
-
     VisualEffect enemyParticles;
     Vector3 temporarySpawnSave;
 
@@ -39,7 +36,6 @@ public class Enemy : MonoBehaviour
     {
         temporarySpawnSave = transform.position;
 
-        agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
         thisCollider = GetComponent<Collider>();
 
@@ -47,7 +43,6 @@ public class Enemy : MonoBehaviour
 
         thisChampion = GetComponent<Champion>();
         thisChampion.Init();
-
 
         thisChampion.championDeath += Respawn;
 
@@ -74,30 +69,6 @@ public class Enemy : MonoBehaviour
 
         attackState.counter += Time.deltaTime;
 
-        if (enemyTransform)
-        {
-            if (enemyTransform.GetComponent<Champion>().dead)
-            {
-                activeState = moveState;
-
-                enemyTransform = null;
-                moveState.RecalculatePath(endPos.position);
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
-            {
-                activeState = attackState;
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
-            {
-                activeState = moveState;
-            }
-            else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange)
-            {
-                activeState = moveState;
-                moveState.RecalculatePath(endPos.position);
-            }
-        }
-
         if (!enemyTransform)
         {
             activeState = moveState;
@@ -115,9 +86,40 @@ public class Enemy : MonoBehaviour
             }
         }
 
+        if (enemyTransform)
+        {
 
+            if (enemyTransform.GetComponent<Champion>().dead)
+            {
+                activeState = moveState;
+
+                enemyTransform = null;
+                moveState.RecalculatePath(endPos.position);
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) < attackRange)
+            {
+                activeState = attackState;
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) < detectionRange)
+            {
+                activeState = moveState;
+            }
+            else if (Vector3.Distance(transform.position, enemyTransform.position) > detectionRange*2)
+            {
+                activeState = moveState;
+                enemyTransform = null;
+                moveState.RecalculatePath(endPos.position);
+            }
+        }
 
         activeState.Execute(enemyTransform, Time.deltaTime);
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(0,255,0,0.1f);
+
+        Gizmos.DrawSphere(transform.position, detectionRange);
     }
 
     void PlayMovementParticles()
@@ -155,22 +157,7 @@ public class Enemy : MonoBehaviour
             child.gameObject.SetActive(false);
         }
 
-        Collider[] champsClose = Physics.OverlapSphere(transform.position, expRange);
-
-        foreach(Collider champ in champsClose)
-        {
-            Champion champComponent =  champ.GetComponent<Champion>();
-
-            if (champComponent)
-            {
-                if (champComponent.GetComponent<Player>() && champComponent.team != thisChampion.team)
-                {
-                    Debug.Log(champComponent.name + " Gained: " + thisChampion.bi.expWorth);
-                    champComponent.GainExp(thisChampion.bi.expWorth);
-                }
-            }
-        }
-
+        DistributeExp();
 
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
         GetComponent<VisualEffect>().SendEvent("Die");
@@ -196,6 +183,24 @@ public class Enemy : MonoBehaviour
         activeState = moveState;
 
         GetComponent<HealthBar>().UpdateHpBar(1 / ((thisChampion.bi.baseHealth + thisChampion.bi.healthPerLevel * thisChampion.level) / thisChampion.hp));
+    }
+
+    void DistributeExp()
+    {
+        Collider[] champsClose = Physics.OverlapSphere(transform.position, expRange);
+
+        foreach (Collider champ in champsClose)
+        {
+            Champion champComponent = champ.GetComponent<Champion>();
+
+            if (champComponent)
+            {
+                if (champComponent.GetComponent<Player>() && champComponent.team != thisChampion.team)
+                {
+                    champComponent.GainExp(thisChampion.bi.expWorth);
+                }
+            }
+        }
     }
 
 }

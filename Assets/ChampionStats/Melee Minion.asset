@@ -15,26 +15,26 @@ MonoBehaviour:
   gold: 20
   expWorth: 42
   speed: 0
-  armor: 0
-  magicResist: 0
+  armor: 11
+  magicResist: 30
   abilityPower: 0
-  healthRegen: 0
-  manaRegen: 0
+  healthRegen: 5.5
+  manaRegen: 6.25
   attackSpeed: 0
-  effectiveHealthAR: 0
+  effectiveHealthAR: 421.8
   enemyAD: 0
-  damageReductionAR: 0
-  realDamageAR: 0
+  damageReductionAR: 0.9009009
+  realDamageAR: 0.9009009
   armorPenFlat: 0
   armorPenPc: 0
-  armorPenPcFactor: 0
-  effectiveHealthMR: 0
+  armorPenPcFactor: 1
+  effectiveHealthMR: 494
   enemyAPDamage: 0
-  damageReductionMR: 0
-  realDamageMR: 0
+  damageReductionMR: 0.7692308
+  realDamageMR: 0.7692308
   magicPenFlat: 0
   magicPenPc: 0
-  magicPenPcFactor: 0
+  magicPenPcFactor: 1
   damagePerLevel: 0
   healthPerLevel: 0
   manaPerLevel: 0
@@ -43,7 +43,7 @@ MonoBehaviour:
   healthRegenPerLevel: 0
   manaRegenPerLevel: 0
   baseDamage: 10
-  baseSpeed: 120
+  baseSpeed: 600
   baseHealth: 380
   baseArmor: 11
   baseMagicResist: 30

@@ -10,11 +10,28 @@ public class AhriW : SkillState
     {
         this.shot = shot;
         this.shot.SetActive(false);
+
+        this.anim = anim;
+
+        this.thisChampion = thisChampion;
+        this.player = player;
+
+        cooldown = 10;
+        counter = cooldown;
+        castTime = 1.1f;
     }
 
     public override void Execute(Transform targetTransform, float deltaTime)
     {
+        if(counter < cooldown) { return; }
 
         anim.SetBool("Moving", false);
+
+        counter = 0;
+    }
+
+    public override bool OnCooldown()
+    {
+        return base.OnCooldown();
     }
 }

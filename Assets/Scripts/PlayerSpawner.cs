@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerSpawner : MonoBehaviour
 {
     public BasicInformation[] championStatArray;
-    public GameObject baseChampion;
+    public GameObject[] champions;
     public GameObject cameraPrefab;
 
     GameObject cameraInstance;
@@ -18,16 +18,19 @@ public class PlayerSpawner : MonoBehaviour
 
         cameraInstance = Instantiate(cameraPrefab, transform.position, Quaternion.identity);
 
+        int i = 0;
 
         foreach(BasicInformation info in championStatArray)
         {
-            GameObject temp = Instantiate(baseChampion);
+            GameObject temp = Instantiate(champions[i]);
             temp.transform.position = spawnBase;
             temp.name = info.name;
-            temp.tag = "Enemy";
+            //temp.tag = "Enemy";
             temp.layer = LayerMask.NameToLayer("Attackable");
             temp.GetComponent<Champion>().bi = info;
             temp.GetComponent<Champion>().team = Team.Red;
+
+            temp.GetComponent<ChampionSkills>().Init();
 
             if (info.name == "Ahri")
             {
