@@ -167,7 +167,10 @@ public class Player : MonoBehaviour
             else
             {
                 enemy = null;
-                moveState.RecalculatePath(hit.point);
+                Vector3 testPos = hit.point;
+                testPos.y = transform.position.y;
+
+                moveState.RecalculatePath(testPos);
             }
         }
 

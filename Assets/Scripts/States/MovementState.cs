@@ -36,7 +36,10 @@ public class MovementState : PlayerState
     public void RecalculatePath(Vector3 targetPos)
     {
         //path = PathfindingHandler.instance.GetPath(player.transform.position, targetPos, 10, 10);
-        if(!thisAgent.CalculatePath(targetPos, path)) 
+
+        thisAgent.Warp(player.transform.position);
+
+        if (!thisAgent.CalculatePath(targetPos, path)) 
         {
             NavMeshHit navMeshHit;
             if (NavMesh.SamplePosition(targetPos, out navMeshHit, 10, NavMesh.AllAreas))
@@ -50,6 +53,8 @@ public class MovementState : PlayerState
         }
         currentNode = 1;
         thisAgent.isStopped = false;
+        thisAgent.updatePosition = false;
+        thisAgent.updateRotation = false;
     }
 
 	public override void Execute (Transform targetPos,float deltaTime) 
@@ -57,18 +62,20 @@ public class MovementState : PlayerState
         if(currentNode >= path.corners.Length) { return; }
 
         normalizedDir = (path.corners[currentNode] - player.transform.position).normalized;
-        normalizedDir.y = player.transform.position.y;
+        normalizedDir.y = 0;
 
         lookPos = player.transform.position + normalizedDir;
         lookPos.y = player.transform.position.y;
 
         beginMove?.Invoke();
 
+        anim.SetBool("Moving", true);
+
         if (Vector3.Distance(player.transform.position, path.corners[currentNode]) > stopDistance)
         {
             player.transform.LookAt(lookPos);
             
-            player.transform.position += normalizedDir * Time.deltaTime * thisChampion.speed * 0.01f;
+            player.transform.position += normalizedDir * (thisChampion.speed * 0.01f * deltaTime);
 
         }
         else
